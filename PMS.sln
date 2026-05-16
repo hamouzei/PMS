@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PMS.Domain", "PMS.Domain\PM
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PMS.Persistence", "PMS.Persistence\PMS.Persistence.csproj", "{BCFCAA63-9CD2-4856-8B87-73EFF3307A94}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PMS.Tests", "PMS.Tests\PMS.Tests.csproj", "{2517745D-A810-4213-B2FE-C30A09CE058D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,6 +71,18 @@ Global
 		{BCFCAA63-9CD2-4856-8B87-73EFF3307A94}.Release|x64.Build.0 = Release|Any CPU
 		{BCFCAA63-9CD2-4856-8B87-73EFF3307A94}.Release|x86.ActiveCfg = Release|Any CPU
 		{BCFCAA63-9CD2-4856-8B87-73EFF3307A94}.Release|x86.Build.0 = Release|Any CPU
+		{2517745D-A810-4213-B2FE-C30A09CE058D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2517745D-A810-4213-B2FE-C30A09CE058D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2517745D-A810-4213-B2FE-C30A09CE058D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{2517745D-A810-4213-B2FE-C30A09CE058D}.Debug|x64.Build.0 = Debug|Any CPU
+		{2517745D-A810-4213-B2FE-C30A09CE058D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{2517745D-A810-4213-B2FE-C30A09CE058D}.Debug|x86.Build.0 = Debug|Any CPU
+		{2517745D-A810-4213-B2FE-C30A09CE058D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2517745D-A810-4213-B2FE-C30A09CE058D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2517745D-A810-4213-B2FE-C30A09CE058D}.Release|x64.ActiveCfg = Release|Any CPU
+		{2517745D-A810-4213-B2FE-C30A09CE058D}.Release|x64.Build.0 = Release|Any CPU
+		{2517745D-A810-4213-B2FE-C30A09CE058D}.Release|x86.ActiveCfg = Release|Any CPU
+		{2517745D-A810-4213-B2FE-C30A09CE058D}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
