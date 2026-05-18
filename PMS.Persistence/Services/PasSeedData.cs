@@ -8,12 +8,26 @@ public static class PasSeedData
 {
     public static async Task SeedAsync(PMSDbContext context, CancellationToken cancellationToken = default)
     {
+        var seedPasswordHash = BCrypt.Net.BCrypt.HashPassword("Pass@123");
+        var usersMissingPasswords = await context.Users
+            .Where(user => user.PasswordHash == string.Empty)
+            .ToListAsync(cancellationToken);
+
+        foreach (var user in usersMissingPasswords)
+        {
+            user.PasswordHash = seedPasswordHash;
+        }
+
+        if (usersMissingPasswords.Count > 0)
+        {
+            await context.SaveChangesAsync(cancellationToken);
+        }
+
         if (await context.Users.AnyAsync(cancellationToken))
         {
             return;
         }
 
-        var seedPasswordHash = BCrypt.Net.BCrypt.HashPassword("Pass@123");
         var users = new[]
         {
             new AppUser { EmployeeId = "PAS-ADMIN", UserName = "admin", FullName = "Property Administrator", PasswordHash = seedPasswordHash, Role = UserRole.PropertyAdmin, Department = "Property Administration", Division = "HO" },
