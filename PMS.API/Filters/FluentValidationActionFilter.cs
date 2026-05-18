@@ -34,12 +34,13 @@ public class FluentValidationActionFilter(IServiceProvider serviceProvider) : IA
 
         if (errors.Count > 0)
         {
-            context.Result = new BadRequestObjectResult(new ValidationProblemDetails(errors)
+            var problemDetails = new ValidationProblemDetails(errors)
             {
                 Status = StatusCodes.Status400BadRequest,
-                Title = "Validation failed",
-                TraceId = context.HttpContext.TraceIdentifier
-            });
+                Title = "Validation failed"
+            };
+            problemDetails.Extensions["traceId"] = context.HttpContext.TraceIdentifier;
+            context.Result = new BadRequestObjectResult(problemDetails);
             return;
         }
 

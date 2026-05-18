@@ -13,14 +13,15 @@ public static class PasSeedData
             return;
         }
 
+        var seedPasswordHash = BCrypt.Net.BCrypt.HashPassword("Pass@123");
         var users = new[]
         {
-            new AppUser { EmployeeId = "PAS-ADMIN", UserName = "admin", FullName = "Property Administrator", Role = UserRole.PropertyAdmin, Department = "Property Administration", Division = "HO" },
-            new AppUser { EmployeeId = "PAS-STORE", UserName = "storekeeper", FullName = "Central Store Keeper", Role = UserRole.Storekeeper, Department = "Property Administration", Division = "HO" },
-            new AppUser { EmployeeId = "PAS-REQ", UserName = "requester", FullName = "Requisitioning Staff", Role = UserRole.RequisitioningStaff, Department = "Operations", Division = "HO" },
-            new AppUser { EmployeeId = "PAS-MGR", UserName = "manager", FullName = "Department Manager", Role = UserRole.DepartmentManager, Department = "Operations", Division = "HO" },
-            new AppUser { EmployeeId = "PAS-INSP", UserName = "inspector", FullName = "Inspection Officer", Role = UserRole.Inspector, Department = "Property Administration", Division = "HO" },
-            new AppUser { EmployeeId = "PAS-COMP", UserName = "compliance", FullName = "Compliance Officer", Role = UserRole.ComplianceOfficer, Department = "Compliance", Division = "HO" }
+            new AppUser { EmployeeId = "PAS-ADMIN", UserName = "admin", FullName = "Property Administrator", PasswordHash = seedPasswordHash, Role = UserRole.PropertyAdmin, Department = "Property Administration", Division = "HO" },
+            new AppUser { EmployeeId = "PAS-STORE", UserName = "storekeeper", FullName = "Central Store Keeper", PasswordHash = seedPasswordHash, Role = UserRole.Storekeeper, Department = "Property Administration", Division = "HO" },
+            new AppUser { EmployeeId = "PAS-REQ", UserName = "requester", FullName = "Requisitioning Staff", PasswordHash = seedPasswordHash, Role = UserRole.RequisitioningStaff, Department = "Operations", Division = "HO" },
+            new AppUser { EmployeeId = "PAS-MGR", UserName = "manager", FullName = "Department Manager", PasswordHash = seedPasswordHash, Role = UserRole.DepartmentManager, Department = "Operations", Division = "HO" },
+            new AppUser { EmployeeId = "PAS-INSP", UserName = "inspector", FullName = "Inspection Officer", PasswordHash = seedPasswordHash, Role = UserRole.Inspector, Department = "Property Administration", Division = "HO" },
+            new AppUser { EmployeeId = "PAS-COMP", UserName = "compliance", FullName = "Compliance Officer", PasswordHash = seedPasswordHash, Role = UserRole.ComplianceOfficer, Department = "Compliance", Division = "HO" }
         };
 
         var fixedAssets = new Category { Name = "Fixed Assets", Description = "Capital assets tracked under user custody." };

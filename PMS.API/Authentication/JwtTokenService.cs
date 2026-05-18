@@ -13,6 +13,11 @@ public class JwtTokenService(IOptions<JwtOptions> options) : IJwtTokenService
 
     public string CreateToken(AppUser user)
     {
+        if (string.IsNullOrWhiteSpace(_options.SigningKey))
+        {
+            throw new InvalidOperationException("JWT signing key is not configured.");
+        }
+
         var claims = new List<Claim>
         {
             new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),

@@ -14,8 +14,12 @@ public static class PersistenceServiceRegistration
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("DefaultConnection")
-            ?? throw new InvalidOperationException("Connection string 'DefaultConnection' is not configured.");
+        var connectionString = configuration.GetConnectionString("DefaultConnection");
+        if (string.IsNullOrWhiteSpace(connectionString))
+        {
+            throw new InvalidOperationException(
+                "Connection string 'DefaultConnection' is not configured. Set ConnectionStrings__DefaultConnection or use dotnet user-secrets.");
+        }
 
         services.AddDbContext<PMSDbContext>(options => options.UseSqlServer(connectionString));
         services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));

@@ -2,7 +2,7 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using Newtonsoft.Json;
 using PMS.API.Authentication;
 using PMS.API.Filters;
@@ -15,7 +15,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.ConfigureApplicationServices();
 builder.Services.ConfigurePersistenceServices(builder.Configuration);
-builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.SectionName));
+builder.Services
+    .AddOptions<JwtOptions>()
+    .Bind(builder.Configuration.GetSection(JwtOptions.SectionName))
+    .Validate(options => !string.IsNullOrWhiteSpace(options.SigningKey), "JWT signing key is not configured.")
+    .ValidateOnStart();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 
 builder.Services
@@ -28,7 +32,13 @@ builder.Services
         options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
     });
 
-var jwtOptions = builder.Configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>() ?? new JwtOptions();
+var jwtOptions = builder.Configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>()
+    ?? throw new InvalidOperationException("JWT configuration section is missing.");
+if (string.IsNullOrWhiteSpace(jwtOptions.SigningKey))
+{
+    throw new InvalidOperationException("JWT signing key is not configured. Set Jwt__SigningKey or use dotnet user-secrets.");
+}
+
 const string smartAuthenticationScheme = "Smart";
 builder.Services
     .AddAuthentication(options =>
@@ -91,17 +101,10 @@ builder.Services.AddSwaggerGen(options =>
         Description = "Enter a JWT token from /api/auth/login."
     });
 
-    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
     {
         {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
+            new OpenApiSecuritySchemeReference("Bearer", document),
             []
         }
     });

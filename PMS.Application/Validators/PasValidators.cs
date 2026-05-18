@@ -32,6 +32,17 @@ public class StockLineRequestValidator : AbstractValidator<StockLineRequest>
     }
 }
 
+public class CreateUserRequestValidator : AbstractValidator<CreateUserRequest>
+{
+    public CreateUserRequestValidator()
+    {
+        RuleFor(request => request.EmployeeId).NotEmpty().MaximumLength(80);
+        RuleFor(request => request.UserName).NotEmpty().MaximumLength(100);
+        RuleFor(request => request.FullName).NotEmpty().MaximumLength(200);
+        RuleFor(request => request.Password).NotEmpty().MinimumLength(8);
+    }
+}
+
 public class RegisterOpeningBalanceRequestValidator : AbstractValidator<RegisterOpeningBalanceRequest>
 {
     public RegisterOpeningBalanceRequestValidator()
@@ -192,5 +203,14 @@ public class LoginRequestValidator : AbstractValidator<LoginRequest>
     {
         RuleFor(request => request.EmployeeId).NotEmpty();
         RuleFor(request => request.UserName).NotEmpty();
+        RuleFor(request => request.Password).NotEmpty();
+    }
+}
+
+public class RefreshTokenRequestValidator : AbstractValidator<RefreshTokenRequest>
+{
+    public RefreshTokenRequestValidator()
+    {
+        RuleFor(request => request.RefreshToken).NotEmpty();
     }
 }

@@ -36,11 +36,14 @@ public class AppUser : BaseDomainEntity
     public string EmployeeId { get; set; } = string.Empty;
     public string UserName { get; set; } = string.Empty;
     public string FullName { get; set; } = string.Empty;
+    public string PasswordHash { get; set; } = string.Empty;
     public UserRole Role { get; set; }
     public string? Department { get; set; }
     public string? Division { get; set; }
     public string? Location { get; set; }
     public string? Title { get; set; }
+    public Guid? RefreshToken { get; set; }
+    public DateTime? RefreshTokenExpiresAt { get; set; }
     public bool IsActive { get; set; } = true;
 }
 

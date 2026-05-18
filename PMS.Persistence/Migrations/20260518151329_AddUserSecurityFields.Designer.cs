@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PMS.Persistence;
 
@@ -11,9 +12,11 @@ using PMS.Persistence;
 namespace PMS.Persistence.Migrations
 {
     [DbContext(typeof(PMSDbContext))]
-    partial class PMSDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260518151329_AddUserSecurityFields")]
+    partial class AddUserSecurityFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

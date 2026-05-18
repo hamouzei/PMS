@@ -6,6 +6,6 @@ public class JwtOptions
 
     public string Issuer { get; set; } = "PMS";
     public string Audience { get; set; } = "PMS.Client";
-    public string SigningKey { get; set; } = "development-signing-key-change-before-production-32";
+    public string SigningKey { get; set; } = string.Empty;
     public int ExpiryMinutes { get; set; } = 120;
 }

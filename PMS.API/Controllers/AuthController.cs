@@ -18,7 +18,6 @@ public class AuthController(PMSDbContext context, IJwtTokenService tokenService)
     public async Task<IActionResult> Login(LoginRequest request, CancellationToken cancellationToken)
     {
         var user = await context.Users
-            .AsNoTracking()
             .SingleOrDefaultAsync(value =>
                 value.EmployeeId == request.EmployeeId
                 && value.UserName == request.UserName
@@ -26,10 +25,17 @@ public class AuthController(PMSDbContext context, IJwtTokenService tokenService)
                 && value.IsActive,
                 cancellationToken);
 
-        if (user is null)
+        if (user is null
+            || string.IsNullOrWhiteSpace(user.PasswordHash)
+            || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
         {
             return Unauthorized(new { error = "Invalid or inactive PAS user." });
         }
+
+        var refreshTokenExpiresAt = DateTime.UtcNow.AddDays(7);
+        user.RefreshToken = Guid.NewGuid();
+        user.RefreshTokenExpiresAt = refreshTokenExpiresAt;
+        await context.SaveChangesAsync(cancellationToken);
 
         return Ok(new LoginResponse(
             "Bearer",
@@ -37,6 +43,40 @@ public class AuthController(PMSDbContext context, IJwtTokenService tokenService)
             request.UserName,
             request.Role.ToString(),
             tokenService.CreateToken(user),
+            user.RefreshToken.Value,
+            refreshTokenExpiresAt,
+            ["Authorization: Bearer <token>"]));
+    }
+
+    [HttpPost("refresh")]
+    [AllowAnonymous]
+    public async Task<IActionResult> Refresh(RefreshTokenRequest request, CancellationToken cancellationToken)
+    {
+        var user = await context.Users
+            .SingleOrDefaultAsync(value =>
+                value.RefreshToken == request.RefreshToken
+                && value.RefreshTokenExpiresAt > DateTime.UtcNow
+                && value.IsActive,
+                cancellationToken);
+
+        if (user is null)
+        {
+            return Unauthorized(new { error = "Invalid or expired refresh token." });
+        }
+
+        var refreshTokenExpiresAt = DateTime.UtcNow.AddDays(7);
+        user.RefreshToken = Guid.NewGuid();
+        user.RefreshTokenExpiresAt = refreshTokenExpiresAt;
+        await context.SaveChangesAsync(cancellationToken);
+
+        return Ok(new LoginResponse(
+            "Bearer",
+            user.EmployeeId,
+            user.UserName,
+            user.Role.ToString(),
+            tokenService.CreateToken(user),
+            user.RefreshToken.Value,
+            refreshTokenExpiresAt,
             ["Authorization: Bearer <token>"]));
     }
 

@@ -131,8 +131,10 @@ public class PMSDbContext(DbContextOptions<PMSDbContext> options) : DbContext(op
             entity.Property(value => value.EmployeeId).HasMaxLength(80).IsRequired();
             entity.Property(value => value.UserName).HasMaxLength(100).IsRequired();
             entity.Property(value => value.FullName).HasMaxLength(200).IsRequired();
+            entity.Property(value => value.PasswordHash).HasMaxLength(200).IsRequired();
             entity.HasIndex(value => value.EmployeeId).IsUnique();
             entity.HasIndex(value => value.UserName).IsUnique();
+            entity.HasIndex(value => value.RefreshToken).IsUnique().HasFilter("[RefreshToken] IS NOT NULL");
         });
 
         modelBuilder.Entity<Warehouse>(entity =>

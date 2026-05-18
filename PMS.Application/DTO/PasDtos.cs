@@ -28,6 +28,7 @@ public record CreateUserRequest(
     string EmployeeId,
     string UserName,
     string FullName,
+    string Password,
     UserRole Role,
     string? Department,
     string? Division,
@@ -55,6 +56,18 @@ public record CreateSupplierRequest(
     string? TinNumber,
     string? PhoneNumber,
     string? Email);
+
+public record AppUserDto(
+    Guid Id,
+    string EmployeeId,
+    string UserName,
+    string FullName,
+    UserRole Role,
+    string? Department,
+    string? Division,
+    string? Location,
+    string? Title,
+    bool IsActive);
 
 public record StockLineRequest(
     Guid ItemId,
@@ -182,6 +195,7 @@ public record AnnualInventoryLineRequest(
 public record LoginRequest(
     string EmployeeId,
     string UserName,
+    string Password,
     UserRole Role);
 
 public record LoginResponse(
@@ -190,7 +204,12 @@ public record LoginResponse(
     string UserName,
     string Role,
     string Token,
+    Guid RefreshToken,
+    DateTime RefreshTokenExpiresAt,
     string[] RequiredHeaders);
+
+public record RefreshTokenRequest(
+    Guid RefreshToken);
 
 public record DocumentResult(
     Guid Id,
