@@ -1,8 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MediatR;
 using PMS.API.Authorization;
-using PMS.Application.Contracts.Services;
+using PMS.Application.CQRS;
 using PMS.Application.DTO;
 using PMS.Persistence;
 
@@ -11,7 +12,7 @@ namespace PMS.API.Controllers;
 [ApiController]
 [Route("api/store-requests")]
 [Authorize(Roles = PasRoles.RequestActors + "," + PasRoles.StockActors)]
-public class StoreRequestsController(PMSDbContext context, IPasWorkflowService workflowService) : ControllerBase
+public class StoreRequestsController(PMSDbContext context, IMediator mediator) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> Get(CancellationToken cancellationToken)
@@ -40,20 +41,20 @@ public class StoreRequestsController(PMSDbContext context, IPasWorkflowService w
     [HttpPost]
     public async Task<IActionResult> Create(CreateStoreRequestRequest request, CancellationToken cancellationToken)
     {
-        return Ok(await workflowService.CreateStoreRequest(request, cancellationToken));
+        return Ok(await mediator.Send(new CreateStoreRequestCommand(request), cancellationToken));
     }
 
     [HttpPost("{id:guid}/approve")]
     [Authorize(Roles = PasRoles.Approvers)]
     public async Task<IActionResult> Approve(Guid id, ApproveRequest request, CancellationToken cancellationToken)
     {
-        return Ok(await workflowService.ApproveStoreRequest(id, request, cancellationToken));
+        return Ok(await mediator.Send(new ApproveStoreRequestCommand(id, request), cancellationToken));
     }
 
     [HttpPost("{id:guid}/reject")]
     [Authorize(Roles = PasRoles.Approvers)]
     public async Task<IActionResult> Reject(Guid id, RejectRequest request, CancellationToken cancellationToken)
     {
-        return Ok(await workflowService.RejectStoreRequest(id, request, cancellationToken));
+        return Ok(await mediator.Send(new RejectStoreRequestCommand(id, request), cancellationToken));
     }
 }

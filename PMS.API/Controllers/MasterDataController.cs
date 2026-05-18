@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using AutoMapper;
 using PMS.API.Authorization;
 using PMS.Application.DTO;
 using PMS.Domain.Entities;
@@ -11,7 +12,7 @@ namespace PMS.API.Controllers;
 [ApiController]
 [Route("api/master-data")]
 [Authorize]
-public class MasterDataController(PMSDbContext context) : ControllerBase
+public class MasterDataController(PMSDbContext context, IMapper mapper) : ControllerBase
 {
     [HttpGet("categories")]
     [Authorize(Roles = PasRoles.RequestActors + "," + PasRoles.AdminOrStorekeeper + "," + PasRoles.ReportViewer)]
@@ -24,12 +25,7 @@ public class MasterDataController(PMSDbContext context) : ControllerBase
     [Authorize(Roles = PasRoles.AdminOrStorekeeper)]
     public async Task<IActionResult> CreateCategory(CreateCategoryRequest request, CancellationToken cancellationToken)
     {
-        var category = new Category
-        {
-            Name = request.Name,
-            Description = request.Description,
-            ParentCategoryId = request.ParentCategoryId
-        };
+        var category = mapper.Map<Category>(request);
 
         context.Categories.Add(category);
         await context.SaveChangesAsync(cancellationToken);
@@ -68,18 +64,7 @@ public class MasterDataController(PMSDbContext context) : ControllerBase
     [Authorize(Roles = PasRoles.AdminOrStorekeeper)]
     public async Task<IActionResult> CreateItem(CreateItemRequest request, CancellationToken cancellationToken)
     {
-        var item = new ItemMaster
-        {
-            Sku = request.Sku,
-            ItemName = request.ItemName,
-            Description = request.Description,
-            CategoryId = request.CategoryId,
-            PropertyType = request.PropertyType,
-            UnitOfMeasure = request.UnitOfMeasure,
-            RequiresInspection = request.RequiresInspection,
-            MinStockLevel = request.MinStockLevel,
-            UnitCost = request.UnitCost
-        };
+        var item = mapper.Map<ItemMaster>(request);
 
         context.ItemMasters.Add(item);
         await context.SaveChangesAsync(cancellationToken);
@@ -120,13 +105,7 @@ public class MasterDataController(PMSDbContext context) : ControllerBase
     [Authorize(Roles = PasRoles.AdminOrStorekeeper)]
     public async Task<IActionResult> CreateWarehouse(CreateWarehouseRequest request, CancellationToken cancellationToken)
     {
-        var warehouse = new Warehouse
-        {
-            WarehouseName = request.WarehouseName,
-            LocationCode = request.LocationCode,
-            LocationType = request.LocationType,
-            Address = request.Address
-        };
+        var warehouse = mapper.Map<Warehouse>(request);
 
         context.Warehouses.Add(warehouse);
         await context.SaveChangesAsync(cancellationToken);
@@ -149,16 +128,7 @@ public class MasterDataController(PMSDbContext context) : ControllerBase
     [Authorize(Roles = PasRoles.AdminOrStorekeeper)]
     public async Task<IActionResult> CreateShelf(CreateShelfLocationRequest request, CancellationToken cancellationToken)
     {
-        var shelf = new ShelfLocation
-        {
-            WarehouseId = request.WarehouseId,
-            Aisle = request.Aisle,
-            Rack = request.Rack,
-            ShelfNumber = request.ShelfNumber,
-            Bin = request.Bin,
-            QrCodeValue = request.QrCodeValue,
-            Capacity = request.Capacity
-        };
+        var shelf = mapper.Map<ShelfLocation>(request);
 
         context.ShelfLocations.Add(shelf);
         await context.SaveChangesAsync(cancellationToken);
@@ -176,14 +146,7 @@ public class MasterDataController(PMSDbContext context) : ControllerBase
     [Authorize(Roles = PasRoles.AdminOrStorekeeper + "," + PasRoles.ProcurementOfficer)]
     public async Task<IActionResult> CreateSupplier(CreateSupplierRequest request, CancellationToken cancellationToken)
     {
-        var supplier = new Supplier
-        {
-            SupplierName = request.SupplierName,
-            ContactPerson = request.ContactPerson,
-            TinNumber = request.TinNumber,
-            PhoneNumber = request.PhoneNumber,
-            Email = request.Email
-        };
+        var supplier = mapper.Map<Supplier>(request);
 
         context.Suppliers.Add(supplier);
         await context.SaveChangesAsync(cancellationToken);
@@ -201,17 +164,7 @@ public class MasterDataController(PMSDbContext context) : ControllerBase
     [Authorize(Roles = PasRoles.PropertyAdmin)]
     public async Task<IActionResult> CreateUser(CreateUserRequest request, CancellationToken cancellationToken)
     {
-        var user = new AppUser
-        {
-            EmployeeId = request.EmployeeId,
-            UserName = request.UserName,
-            FullName = request.FullName,
-            Role = request.Role,
-            Department = request.Department,
-            Division = request.Division,
-            Location = request.Location,
-            Title = request.Title
-        };
+        var user = mapper.Map<AppUser>(request);
 
         context.Users.Add(user);
         await context.SaveChangesAsync(cancellationToken);

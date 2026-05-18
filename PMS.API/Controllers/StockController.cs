@@ -1,8 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MediatR;
 using PMS.API.Authorization;
-using PMS.Application.Contracts.Services;
+using PMS.Application.CQRS;
 using PMS.Application.DTO;
 using PMS.Persistence;
 
@@ -11,7 +12,7 @@ namespace PMS.API.Controllers;
 [ApiController]
 [Route("api/stock")]
 [Authorize(Roles = PasRoles.StockActors + "," + PasRoles.ReportActors)]
-public class StockController(PMSDbContext context, IPasWorkflowService workflowService) : ControllerBase
+public class StockController(PMSDbContext context, IMediator mediator) : ControllerBase
 {
     [HttpGet("balances")]
     public async Task<IActionResult> GetBalances(CancellationToken cancellationToken)
@@ -73,13 +74,13 @@ public class StockController(PMSDbContext context, IPasWorkflowService workflowS
     [Authorize(Roles = PasRoles.StockActors)]
     public async Task<IActionResult> RegisterOpeningBalance(RegisterOpeningBalanceRequest request, CancellationToken cancellationToken)
     {
-        return Ok(await workflowService.RegisterOpeningBalance(request, cancellationToken));
+        return Ok(await mediator.Send(new RegisterOpeningBalanceCommand(request), cancellationToken));
     }
 
     [HttpPost("adjustments")]
     [Authorize(Roles = PasRoles.StockActors)]
     public async Task<IActionResult> AdjustStock(StockAdjustmentRequest request, CancellationToken cancellationToken)
     {
-        return Ok(await workflowService.AdjustStock(request, cancellationToken));
+        return Ok(await mediator.Send(new AdjustStockCommand(request), cancellationToken));
     }
 }

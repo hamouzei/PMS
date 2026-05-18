@@ -1,25 +1,65 @@
+using System.Text;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using PMS.API.Authentication;
-using PMS.Application.Exceptions;
+using PMS.API.Filters;
+using PMS.API.Middleware;
 using PMS.Application;
 using PMS.Persistence;
+using PMS.Persistence.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.ConfigureApplicationServices();
 builder.Services.ConfigurePersistenceServices(builder.Configuration);
+builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.SectionName));
+builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 
 builder.Services
-    .AddControllers()
+    .AddControllers(options =>
+    {
+        options.Filters.Add<FluentValidationActionFilter>();
+    })
     .AddNewtonsoftJson(options =>
     {
         options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
     });
 
+var jwtOptions = builder.Configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>() ?? new JwtOptions();
+const string smartAuthenticationScheme = "Smart";
 builder.Services
-    .AddAuthentication(HeaderAuthenticationHandler.SchemeName)
+    .AddAuthentication(options =>
+    {
+        options.DefaultScheme = smartAuthenticationScheme;
+        options.DefaultChallengeScheme = smartAuthenticationScheme;
+    })
+    .AddPolicyScheme(smartAuthenticationScheme, smartAuthenticationScheme, options =>
+    {
+        options.ForwardDefaultSelector = context =>
+        {
+            var authorization = context.Request.Headers.Authorization.ToString();
+            return authorization.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase)
+                ? JwtBearerDefaults.AuthenticationScheme
+                : HeaderAuthenticationHandler.SchemeName;
+        };
+    })
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateIssuerSigningKey = true,
+            ValidateLifetime = true,
+            ValidIssuer = jwtOptions.Issuer,
+            ValidAudience = jwtOptions.Audience,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SigningKey)),
+            ClockSkew = TimeSpan.FromMinutes(1)
+        };
+    })
     .AddScheme<AuthenticationSchemeOptions, HeaderAuthenticationHandler>(
         HeaderAuthenticationHandler.SchemeName,
         _ => { });
@@ -39,10 +79,43 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Enter a JWT token from /api/auth/login."
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            []
+        }
+    });
+});
 builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
+
+if (app.Environment.IsDevelopment() && builder.Configuration.GetValue<bool>("SeedData:ApplyOnStartup"))
+{
+    using var scope = app.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<PMSDbContext>();
+    await PasSeedData.SeedAsync(dbContext);
+}
 
 if (app.Environment.IsDevelopment())
 {
@@ -50,22 +123,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseExceptionHandler(errorApp =>
-{
-    errorApp.Run(async context =>
-    {
-        var exception = context.Features.Get<IExceptionHandlerFeature>()?.Error;
-        context.Response.StatusCode = exception is BusinessRuleException
-            ? StatusCodes.Status400BadRequest
-            : StatusCodes.Status500InternalServerError;
-
-        await context.Response.WriteAsJsonAsync(new
-        {
-            error = exception?.Message ?? "Unexpected server error."
-        });
-    });
-});
-
+app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseHttpsRedirection();
 app.UseCors("AngularClient");
 app.UseAuthentication();
@@ -74,3 +132,5 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+public partial class Program;

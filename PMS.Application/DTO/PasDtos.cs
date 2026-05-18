@@ -189,9 +189,16 @@ public record LoginResponse(
     string EmployeeId,
     string UserName,
     string Role,
+    string Token,
     string[] RequiredHeaders);
 
 public record DocumentResult(
     Guid Id,
     string Number,
     WorkflowStatus Status);
+
+public record PagedResult<T>(
+    IReadOnlyList<T> Items,
+    int PageNumber,
+    int PageSize,
+    int TotalCount);

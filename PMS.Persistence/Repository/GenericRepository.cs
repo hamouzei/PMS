@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using PMS.Application.Contracts.IRepository;
+using PMS.Application.DTO;
 using PMS.Domain.Common;
 
 namespace PMS.Persistence.Repository;
@@ -12,6 +13,29 @@ public class GenericRepository<T>(PMSDbContext context) : IGenericRepository<T>
         return await context.Set<T>()
             .AsNoTracking()
             .ToListAsync(cancellationToken);
+    }
+
+    public async Task<PagedResult<T>> GetPaged(
+        int pageNumber,
+        int pageSize,
+        CancellationToken cancellationToken = default)
+    {
+        pageNumber = Math.Max(1, pageNumber);
+        pageSize = Math.Clamp(pageSize, 1, 200);
+
+        var query = context.Set<T>().AsNoTracking().OrderBy(entity => entity.CreatedDate);
+        var totalCount = await query.CountAsync(cancellationToken);
+        var items = await query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        return new PagedResult<T>(items, pageNumber, pageSize, totalCount);
+    }
+
+    public async Task<int> Count(CancellationToken cancellationToken = default)
+    {
+        return await context.Set<T>().AsNoTracking().CountAsync(cancellationToken);
     }
 
     public async Task<T?> GetById(Guid id, CancellationToken cancellationToken = default)

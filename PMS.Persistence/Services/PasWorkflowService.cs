@@ -23,6 +23,7 @@ public class PasWorkflowService(PMSDbContext context) : IPasWorkflowService
         stock.CurrentQuantity += request.Quantity;
         stock.BookBalance += request.Quantity;
         stock.PhysicalBalance += request.Quantity;
+        SynchronizeStock(stock);
 
         context.StockLedgers.Add(CreateLedger(
             request.ItemId,
@@ -56,7 +57,7 @@ public class PasWorkflowService(PMSDbContext context) : IPasWorkflowService
 
         stock.CurrentQuantity = nextQuantity;
         stock.BookBalance += request.QuantityChange;
-        stock.Discrepancy = stock.PhysicalBalance - stock.BookBalance;
+        SynchronizeStock(stock);
 
         context.StockLedgers.Add(CreateLedger(
             request.ItemId,
@@ -124,6 +125,7 @@ public class PasWorkflowService(PMSDbContext context) : IPasWorkflowService
         {
             throw new BusinessRuleException("Only submitted or pending store requests can be approved.");
         }
+        EnsureTransition(serviceRequest.Status, WorkflowStatus.Approved, serviceRequest.SrNumber);
 
         foreach (var detail in serviceRequest.Details)
         {
@@ -140,6 +142,7 @@ public class PasWorkflowService(PMSDbContext context) : IPasWorkflowService
             detail.ApprovedQty = quantityToReserve;
             detail.ShelfId = stock.ShelfId;
             stock.ReservedQuantity += quantityToReserve;
+            SynchronizeStock(stock);
 
             context.StockLedgers.Add(CreateLedger(
                 detail.ItemId,
@@ -173,6 +176,7 @@ public class PasWorkflowService(PMSDbContext context) : IPasWorkflowService
         var serviceRequest = await context.ServiceRequests.SingleOrDefaultAsync(value => value.Id == id, cancellationToken)
             ?? throw new BusinessRuleException("Store request was not found.");
 
+        EnsureTransition(serviceRequest.Status, WorkflowStatus.Rejected, serviceRequest.SrNumber);
         serviceRequest.ApprovedById = request.ActorId;
         serviceRequest.Status = WorkflowStatus.Rejected;
         serviceRequest.SupervisorRemark = request.Reason;
@@ -219,6 +223,7 @@ public class PasWorkflowService(PMSDbContext context) : IPasWorkflowService
         var purchaseRequest = await context.PurchaseRequests.SingleOrDefaultAsync(value => value.Id == id, cancellationToken)
             ?? throw new BusinessRuleException("Purchase request was not found.");
 
+        EnsureTransition(purchaseRequest.Status, WorkflowStatus.Approved, purchaseRequest.PrNumber);
         purchaseRequest.ApprovedById = request.ActorId;
         purchaseRequest.Status = WorkflowStatus.Approved;
         AddNotification(purchaseRequest.RequesterId, "Purchase request approved", $"Purchase request {purchaseRequest.PrNumber} was approved.", purchaseRequest.Id, purchaseRequest.PrNumber);
@@ -299,7 +304,9 @@ public class PasWorkflowService(PMSDbContext context) : IPasWorkflowService
         inspection.IsPassed = request.IsPassed;
         inspection.DeviationNotes = request.DeviationNotes;
         inspection.InspectionDate = DateTime.UtcNow;
-        receivingNote.Status = request.IsPassed ? WorkflowStatus.InspectionPassed : WorkflowStatus.InspectionFailed;
+        var nextStatus = request.IsPassed ? WorkflowStatus.InspectionPassed : WorkflowStatus.InspectionFailed;
+        EnsureTransition(receivingNote.Status, nextStatus, receivingNote.GrnNumber);
+        receivingNote.Status = nextStatus;
 
         AddAttachments(DocumentType.FARN, receivingNote.Id, request.Attachments);
         AddNotification(receivingNote.ReceivedById, "Inspection recorded", $"Inspection for {receivingNote.GrnNumber} was {(request.IsPassed ? "passed" : "failed")}.", receivingNote.Id, receivingNote.GrnNumber);
@@ -324,6 +331,7 @@ public class PasWorkflowService(PMSDbContext context) : IPasWorkflowService
         {
             throw new BusinessRuleException("Receiving note has already been released to stock.");
         }
+        EnsureTransition(receivingNote.Status, WorkflowStatus.Closed, receivingNote.GrnNumber);
 
         var requiresInspection = receivingNote.Details.Any(detail => detail.Item?.RequiresInspection == true);
         if (requiresInspection && receivingNote.Status != WorkflowStatus.InspectionPassed)
@@ -342,6 +350,7 @@ public class PasWorkflowService(PMSDbContext context) : IPasWorkflowService
             stock.CurrentQuantity += detail.QuantityReceived;
             stock.BookBalance += detail.QuantityReceived;
             stock.PhysicalBalance += detail.QuantityReceived;
+            SynchronizeStock(stock);
 
             var documentType = detail.Item?.PropertyType == PropertyType.FixedAsset ? DocumentType.FARN : DocumentType.GRN;
             context.StockLedgers.Add(CreateLedger(
@@ -381,6 +390,7 @@ public class PasWorkflowService(PMSDbContext context) : IPasWorkflowService
         {
             throw new BusinessRuleException("Only approved store requests can be issued.");
         }
+        EnsureTransition(serviceRequest.Status, WorkflowStatus.Issued, serviceRequest.SrNumber);
 
         var hasFixedAsset = serviceRequest.Details.Any(detail => detail.Item?.PropertyType == PropertyType.FixedAsset);
         var voucher = new StoreIssueVoucher
@@ -413,6 +423,8 @@ public class PasWorkflowService(PMSDbContext context) : IPasWorkflowService
             stock.CurrentQuantity -= quantityToIssue;
             stock.ReservedQuantity -= quantityToIssue;
             stock.BookBalance -= quantityToIssue;
+            stock.PhysicalBalance -= quantityToIssue;
+            SynchronizeStock(stock);
             detail.IssuedQty += quantityToIssue;
 
             voucher.Details.Add(new StoreIssueVoucherDetail
@@ -490,12 +502,14 @@ public class PasWorkflowService(PMSDbContext context) : IPasWorkflowService
             .SingleOrDefaultAsync(value => value.Id == id, cancellationToken)
             ?? throw new BusinessRuleException("Property return was not found.");
 
+        EnsureTransition(propertyReturn.Status, WorkflowStatus.Returned, propertyReturn.RmrnNumber);
         foreach (var detail in propertyReturn.Details)
         {
             var stock = await GetOrCreateStock(detail.ItemId, detail.ShelfId, cancellationToken);
             stock.CurrentQuantity += detail.Quantity;
             stock.BookBalance += detail.Quantity;
             stock.PhysicalBalance += detail.Quantity;
+            SynchronizeStock(stock);
 
             await ReduceCustody(propertyReturn.ReturnedById, detail.ItemId, detail.Quantity, cancellationToken);
 
@@ -559,6 +573,7 @@ public class PasWorkflowService(PMSDbContext context) : IPasWorkflowService
             .SingleOrDefaultAsync(value => value.Id == id, cancellationToken)
             ?? throw new BusinessRuleException("Property transfer was not found.");
 
+        EnsureTransition(transfer.Status, WorkflowStatus.Transferred, transfer.RmtnNumber);
         foreach (var detail in transfer.Details)
         {
             await ReduceCustody(transfer.FromCustodianId, detail.ItemId, detail.Quantity, cancellationToken);
@@ -611,6 +626,7 @@ public class PasWorkflowService(PMSDbContext context) : IPasWorkflowService
         var disposal = await context.DisposalRecords.SingleOrDefaultAsync(value => value.Id == id, cancellationToken)
             ?? throw new BusinessRuleException("Disposal record was not found.");
 
+        EnsureTransition(disposal.Status, WorkflowStatus.Disposed, disposal.DisposalNumber);
         if (disposal.ShelfId.HasValue)
         {
             var stock = await GetStock(disposal.ItemId, disposal.ShelfId.Value, cancellationToken);
@@ -621,6 +637,8 @@ public class PasWorkflowService(PMSDbContext context) : IPasWorkflowService
 
             stock.CurrentQuantity -= disposal.Quantity;
             stock.BookBalance -= disposal.Quantity;
+            stock.PhysicalBalance -= disposal.Quantity;
+            SynchronizeStock(stock);
             context.StockLedgers.Add(CreateLedger(
                 disposal.ItemId,
                 disposal.ShelfId.Value,
@@ -684,6 +702,7 @@ public class PasWorkflowService(PMSDbContext context) : IPasWorkflowService
             .SingleOrDefaultAsync(value => value.Id == id, cancellationToken)
             ?? throw new BusinessRuleException("Annual inventory was not found.");
 
+        EnsureTransition(annualInventory.Status, WorkflowStatus.Closed, annualInventory.InventoryNumber);
         annualInventory.Status = WorkflowStatus.Closed;
         if (annualInventory.Lines.Any(line => line.Discrepancy != 0))
         {
@@ -890,4 +909,54 @@ public class PasWorkflowService(PMSDbContext context) : IPasWorkflowService
             Reason = reason
         };
     }
+
+    private static void SynchronizeStock(InventoryStock stock)
+    {
+        if (stock.CurrentQuantity < 0)
+        {
+            throw new BusinessRuleException("Stock current quantity cannot be negative.");
+        }
+
+        if (stock.ReservedQuantity < 0)
+        {
+            throw new BusinessRuleException("Stock reserved quantity cannot be negative.");
+        }
+
+        if (stock.ReservedQuantity > stock.CurrentQuantity)
+        {
+            throw new BusinessRuleException("Reserved quantity cannot exceed current quantity.");
+        }
+
+        stock.Discrepancy = stock.PhysicalBalance - stock.BookBalance;
+    }
+
+    private static void EnsureTransition(WorkflowStatus current, WorkflowStatus next, string documentNumber)
+    {
+        if (current == next)
+        {
+            throw new BusinessRuleException($"{documentNumber} is already {next}.");
+        }
+
+        if (!AllowedTransitions.TryGetValue(current, out var allowed) || !allowed.Contains(next))
+        {
+            throw new BusinessRuleException($"{documentNumber} cannot move from {current} to {next}.");
+        }
+    }
+
+    private static readonly IReadOnlyDictionary<WorkflowStatus, WorkflowStatus[]> AllowedTransitions =
+        new Dictionary<WorkflowStatus, WorkflowStatus[]>
+        {
+            [WorkflowStatus.Draft] = [WorkflowStatus.Submitted, WorkflowStatus.Cancelled],
+            [WorkflowStatus.Submitted] = [WorkflowStatus.PendingApproval, WorkflowStatus.Approved, WorkflowStatus.Rejected, WorkflowStatus.Cancelled, WorkflowStatus.Returned, WorkflowStatus.Transferred, WorkflowStatus.Disposed, WorkflowStatus.Closed],
+            [WorkflowStatus.PendingApproval] = [WorkflowStatus.Approved, WorkflowStatus.Rejected, WorkflowStatus.Cancelled],
+            [WorkflowStatus.Approved] = [WorkflowStatus.Issued, WorkflowStatus.Closed, WorkflowStatus.Disposed, WorkflowStatus.Transferred, WorkflowStatus.Returned],
+            [WorkflowStatus.Received] = [WorkflowStatus.InspectionPending, WorkflowStatus.Closed],
+            [WorkflowStatus.InspectionPending] = [WorkflowStatus.InspectionPassed, WorkflowStatus.InspectionFailed],
+            [WorkflowStatus.InspectionPassed] = [WorkflowStatus.Closed],
+            [WorkflowStatus.InspectionFailed] = [WorkflowStatus.Rejected, WorkflowStatus.Closed],
+            [WorkflowStatus.Issued] = [WorkflowStatus.Closed, WorkflowStatus.Returned],
+            [WorkflowStatus.Returned] = [WorkflowStatus.Closed],
+            [WorkflowStatus.Transferred] = [WorkflowStatus.Closed],
+            [WorkflowStatus.Disposed] = [WorkflowStatus.Closed]
+        };
 }

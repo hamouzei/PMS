@@ -1,25 +1,43 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using PMS.API.Authentication;
 using PMS.Application.DTO;
 using PMS.Domain.Enums;
+using PMS.Persistence;
 
 namespace PMS.API.Controllers;
 
 [ApiController]
 [Route("api/auth")]
-public class AuthController : ControllerBase
+public class AuthController(PMSDbContext context, IJwtTokenService tokenService) : ControllerBase
 {
     [HttpPost("login")]
     [AllowAnonymous]
-    public ActionResult<LoginResponse> Login(LoginRequest request)
+    public async Task<IActionResult> Login(LoginRequest request, CancellationToken cancellationToken)
     {
+        var user = await context.Users
+            .AsNoTracking()
+            .SingleOrDefaultAsync(value =>
+                value.EmployeeId == request.EmployeeId
+                && value.UserName == request.UserName
+                && value.Role == request.Role
+                && value.IsActive,
+                cancellationToken);
+
+        if (user is null)
+        {
+            return Unauthorized(new { error = "Invalid or inactive PAS user." });
+        }
+
         return Ok(new LoginResponse(
-            "Header",
+            "Bearer",
             request.EmployeeId,
             request.UserName,
             request.Role.ToString(),
-            ["X-User-Role", "X-User-Name", "X-Employee-Id", "X-User-Id"]));
+            tokenService.CreateToken(user),
+            ["Authorization: Bearer <token>"]));
     }
 
     [HttpGet("me")]

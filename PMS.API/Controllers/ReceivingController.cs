@@ -1,8 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MediatR;
 using PMS.API.Authorization;
-using PMS.Application.Contracts.Services;
+using PMS.Application.CQRS;
 using PMS.Application.DTO;
 using PMS.Persistence;
 
@@ -11,7 +12,7 @@ namespace PMS.API.Controllers;
 [ApiController]
 [Route("api/receiving")]
 [Authorize(Roles = PasRoles.StockActors)]
-public class ReceivingController(PMSDbContext context, IPasWorkflowService workflowService) : ControllerBase
+public class ReceivingController(PMSDbContext context, IMediator mediator) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> Get(CancellationToken cancellationToken)
@@ -28,13 +29,13 @@ public class ReceivingController(PMSDbContext context, IPasWorkflowService workf
     [HttpPost]
     public async Task<IActionResult> Create(CreateReceivingNoteRequest request, CancellationToken cancellationToken)
     {
-        return Ok(await workflowService.CreateReceivingNote(request, cancellationToken));
+        return Ok(await mediator.Send(new CreateReceivingNoteCommand(request), cancellationToken));
     }
 
     [HttpPost("{id:guid}/release-to-stock")]
     public async Task<IActionResult> Release(Guid id, ReleaseReceivingRequest request, CancellationToken cancellationToken)
     {
         var releaseRequest = request with { ReceivingNoteId = id };
-        return Ok(await workflowService.ReleaseReceivingToStock(releaseRequest, cancellationToken));
+        return Ok(await mediator.Send(new ReleaseReceivingCommand(releaseRequest), cancellationToken));
     }
 }

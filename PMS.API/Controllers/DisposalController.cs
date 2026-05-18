@@ -1,8 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MediatR;
 using PMS.API.Authorization;
-using PMS.Application.Contracts.Services;
+using PMS.Application.CQRS;
 using PMS.Application.DTO;
 using PMS.Persistence;
 
@@ -11,7 +12,7 @@ namespace PMS.API.Controllers;
 [ApiController]
 [Route("api/disposal")]
 [Authorize(Roles = PasRoles.ComplianceOfficer + "," + PasRoles.StockActors)]
-public class DisposalController(PMSDbContext context, IPasWorkflowService workflowService) : ControllerBase
+public class DisposalController(PMSDbContext context, IMediator mediator) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> Get(CancellationToken cancellationToken)
@@ -27,12 +28,12 @@ public class DisposalController(PMSDbContext context, IPasWorkflowService workfl
     [HttpPost]
     public async Task<IActionResult> Create(CreateDisposalRequest request, CancellationToken cancellationToken)
     {
-        return Ok(await workflowService.CreateDisposal(request, cancellationToken));
+        return Ok(await mediator.Send(new CreateDisposalCommand(request), cancellationToken));
     }
 
     [HttpPost("{id:guid}/approve")]
     public async Task<IActionResult> Approve(Guid id, ApproveRequest request, CancellationToken cancellationToken)
     {
-        return Ok(await workflowService.ApproveDisposal(id, request, cancellationToken));
+        return Ok(await mediator.Send(new ApproveDisposalCommand(id, request), cancellationToken));
     }
 }
