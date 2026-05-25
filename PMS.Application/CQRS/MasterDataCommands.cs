@@ -7,6 +7,8 @@ using PMS.Domain.Entities;
 
 namespace PMS.Application.CQRS;
 
+// ── Query definitions ────────────────────────────────────────────────────────
+
 public record GetCategoriesQuery : IRequest<IReadOnlyList<Category>>;
 public record CreateCategoryCommand(CreateCategoryRequest Request) : IRequest<Category>;
 public record UpdateCategoryCommand(Guid Id, CreateCategoryRequest Request) : IRequest<Category?>;
@@ -21,6 +23,18 @@ public record GetSuppliersQuery : IRequest<IReadOnlyList<Supplier>>;
 public record CreateSupplierCommand(CreateSupplierRequest Request) : IRequest<Supplier>;
 public record GetUsersQuery : IRequest<IReadOnlyList<AppUserDto>>;
 public record CreateUserCommand(CreateUserRequest Request) : IRequest<AppUserDto>;
+public record UpdateUserCommand(Guid Id, UpdateUserRequest Request) : IRequest<AppUserDto?>;
+public record ResetUserPasswordCommand(Guid Id, ResetPasswordRequest Request) : IRequest<bool>;
+public record GetSafetyBoxesQuery : IRequest<IReadOnlyList<SafetyBox>>;
+public record CreateSafetyBoxCommand(CreateSafetyBoxRequest Request) : IRequest<SafetyBox>;
+public record CreateSafetyBoxShelfCommand(CreateSafetyBoxShelfRequest Request) : IRequest<SafetyBoxShelf>;
+public record GetPropertyFieldsQuery : IRequest<IReadOnlyList<PropertyField>>;
+public record CreatePropertyFieldCommand(CreatePropertyFieldRequest Request) : IRequest<PropertyField>;
+public record SetPropertyFieldValueCommand(SetPropertyFieldValueRequest Request) : IRequest<PropertyFieldValue>;
+public record GetBudgetAllocationsQuery(int? FiscalYear) : IRequest<IReadOnlyList<BudgetAllocation>>;
+public record CreateBudgetAllocationCommand(CreateBudgetAllocationRequest Request) : IRequest<BudgetAllocation>;
+
+// ── Query handler ────────────────────────────────────────────────────────────
 
 public class MasterDataQueryHandler(
     IGenericRepository<Category> categoryRepository,
@@ -28,13 +42,19 @@ public class MasterDataQueryHandler(
     IGenericRepository<Warehouse> warehouseRepository,
     IGenericRepository<ShelfLocation> shelfRepository,
     IGenericRepository<Supplier> supplierRepository,
-    IGenericRepository<AppUser> userRepository)
+    IGenericRepository<AppUser> userRepository,
+    IGenericRepository<SafetyBox> safetyBoxRepository,
+    IGenericRepository<PropertyField> propertyFieldRepository,
+    IGenericRepository<BudgetAllocation> budgetRepository)
     : IRequestHandler<GetCategoriesQuery, IReadOnlyList<Category>>,
         IRequestHandler<GetItemsQuery, IReadOnlyList<ItemMaster>>,
         IRequestHandler<GetWarehousesQuery, IReadOnlyList<Warehouse>>,
         IRequestHandler<GetShelvesQuery, IReadOnlyList<ShelfLocation>>,
         IRequestHandler<GetSuppliersQuery, IReadOnlyList<Supplier>>,
-        IRequestHandler<GetUsersQuery, IReadOnlyList<AppUserDto>>
+        IRequestHandler<GetUsersQuery, IReadOnlyList<AppUserDto>>,
+        IRequestHandler<GetSafetyBoxesQuery, IReadOnlyList<SafetyBox>>,
+        IRequestHandler<GetPropertyFieldsQuery, IReadOnlyList<PropertyField>>,
+        IRequestHandler<GetBudgetAllocationsQuery, IReadOnlyList<BudgetAllocation>>
 {
     public async Task<IReadOnlyList<Category>> Handle(GetCategoriesQuery request, CancellationToken cancellationToken)
     {
@@ -69,6 +89,24 @@ public class MasterDataQueryHandler(
             .ToList();
     }
 
+    public async Task<IReadOnlyList<SafetyBox>> Handle(GetSafetyBoxesQuery request, CancellationToken cancellationToken)
+    {
+        return (await safetyBoxRepository.GetAll(cancellationToken)).OrderBy(value => value.BoxNumber).ToList();
+    }
+
+    public async Task<IReadOnlyList<PropertyField>> Handle(GetPropertyFieldsQuery request, CancellationToken cancellationToken)
+    {
+        return (await propertyFieldRepository.GetAll(cancellationToken)).OrderBy(value => value.DisplayOrder).ToList();
+    }
+
+    public async Task<IReadOnlyList<BudgetAllocation>> Handle(GetBudgetAllocationsQuery request, CancellationToken cancellationToken)
+    {
+        var all = await budgetRepository.GetAll(cancellationToken);
+        if (request.FiscalYear.HasValue)
+            all = all.Where(b => b.FiscalYear == request.FiscalYear.Value).ToList();
+        return all.OrderBy(b => b.Department).ToList();
+    }
+
     internal static AppUserDto ToDto(AppUser user)
     {
         return new AppUserDto(
@@ -85,6 +123,8 @@ public class MasterDataQueryHandler(
     }
 }
 
+// ── Command handler ──────────────────────────────────────────────────────────
+
 public class MasterDataCommandHandler(
     IGenericRepository<Category> categoryRepository,
     IGenericRepository<ItemMaster> itemRepository,
@@ -92,6 +132,11 @@ public class MasterDataCommandHandler(
     IGenericRepository<ShelfLocation> shelfRepository,
     IGenericRepository<Supplier> supplierRepository,
     IGenericRepository<AppUser> userRepository,
+    IGenericRepository<SafetyBox> safetyBoxRepository,
+    IGenericRepository<SafetyBoxShelf> safetyBoxShelfRepository,
+    IGenericRepository<PropertyField> propertyFieldRepository,
+    IGenericRepository<PropertyFieldValue> propertyFieldValueRepository,
+    IGenericRepository<BudgetAllocation> budgetRepository,
     IMapper mapper)
     : IRequestHandler<CreateCategoryCommand, Category>,
         IRequestHandler<UpdateCategoryCommand, Category?>,
@@ -100,7 +145,14 @@ public class MasterDataCommandHandler(
         IRequestHandler<CreateWarehouseCommand, Warehouse>,
         IRequestHandler<CreateShelfCommand, ShelfLocation>,
         IRequestHandler<CreateSupplierCommand, Supplier>,
-        IRequestHandler<CreateUserCommand, AppUserDto>
+        IRequestHandler<CreateUserCommand, AppUserDto>,
+        IRequestHandler<UpdateUserCommand, AppUserDto?>,
+        IRequestHandler<ResetUserPasswordCommand, bool>,
+        IRequestHandler<CreateSafetyBoxCommand, SafetyBox>,
+        IRequestHandler<CreateSafetyBoxShelfCommand, SafetyBoxShelf>,
+        IRequestHandler<CreatePropertyFieldCommand, PropertyField>,
+        IRequestHandler<SetPropertyFieldValueCommand, PropertyFieldValue>,
+        IRequestHandler<CreateBudgetAllocationCommand, BudgetAllocation>
 {
     public Task<Category> Handle(CreateCategoryCommand command, CancellationToken cancellationToken)
     {
@@ -169,6 +221,81 @@ public class MasterDataCommandHandler(
         user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(command.Request.Password);
 
         return MasterDataQueryHandler.ToDto(await userRepository.Add(user, cancellationToken));
+    }
+
+    // SR002: Admin user management — edit user details
+    public async Task<AppUserDto?> Handle(UpdateUserCommand command, CancellationToken cancellationToken)
+    {
+        var user = await userRepository.GetById(command.Id, cancellationToken);
+        if (user is null) return null;
+
+        if (command.Request.FullName is not null) user.FullName = command.Request.FullName;
+        if (command.Request.Role.HasValue) user.Role = command.Request.Role.Value;
+        if (command.Request.Department is not null) user.Department = command.Request.Department;
+        if (command.Request.Division is not null) user.Division = command.Request.Division;
+        if (command.Request.Location is not null) user.Location = command.Request.Location;
+        if (command.Request.Title is not null) user.Title = command.Request.Title;
+        if (command.Request.IsActive.HasValue) user.IsActive = command.Request.IsActive.Value;
+
+        await userRepository.Update(user, cancellationToken);
+        return MasterDataQueryHandler.ToDto(user);
+    }
+
+    // SR002: Admin — reset password
+    public async Task<bool> Handle(ResetUserPasswordCommand command, CancellationToken cancellationToken)
+    {
+        var user = await userRepository.GetById(command.Id, cancellationToken);
+        if (user is null) return false;
+
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(command.Request.NewPassword);
+        user.FailedLoginAttempts = 0;
+        user.LockedUntil = null;
+        await userRepository.Update(user, cancellationToken);
+        return true;
+    }
+
+    // SR004: Safety Box
+    public Task<SafetyBox> Handle(CreateSafetyBoxCommand command, CancellationToken cancellationToken)
+    {
+        return Add(safetyBoxRepository, mapper.Map<SafetyBox>(command.Request), cancellationToken);
+    }
+
+    public Task<SafetyBoxShelf> Handle(CreateSafetyBoxShelfCommand command, CancellationToken cancellationToken)
+    {
+        return Add(safetyBoxShelfRepository, mapper.Map<SafetyBoxShelf>(command.Request), cancellationToken);
+    }
+
+    // SR003: Custom property fields
+    public Task<PropertyField> Handle(CreatePropertyFieldCommand command, CancellationToken cancellationToken)
+    {
+        return Add(propertyFieldRepository, mapper.Map<PropertyField>(command.Request), cancellationToken);
+    }
+
+    public async Task<PropertyFieldValue> Handle(SetPropertyFieldValueCommand command, CancellationToken cancellationToken)
+    {
+        var existing = (await propertyFieldValueRepository.GetAll(cancellationToken))
+            .FirstOrDefault(v => v.PropertyFieldId == command.Request.PropertyFieldId && v.ItemId == command.Request.ItemId);
+
+        if (existing is not null)
+        {
+            existing.Value = command.Request.Value;
+            await propertyFieldValueRepository.Update(existing, cancellationToken);
+            return existing;
+        }
+
+        var value = new PropertyFieldValue
+        {
+            PropertyFieldId = command.Request.PropertyFieldId,
+            ItemId = command.Request.ItemId,
+            Value = command.Request.Value
+        };
+        return await propertyFieldValueRepository.Add(value, cancellationToken);
+    }
+
+    // SR006: Budget allocation
+    public Task<BudgetAllocation> Handle(CreateBudgetAllocationCommand command, CancellationToken cancellationToken)
+    {
+        return Add(budgetRepository, mapper.Map<BudgetAllocation>(command.Request), cancellationToken);
     }
 
     private static Task<T> Add<T>(

@@ -1,5 +1,6 @@
 using FluentValidation;
 using PMS.Application.CQRS;
+using PMS.Application.Validators;
 
 namespace PMS.Application.Validators;
 
@@ -83,11 +84,27 @@ public class CreateTransferCommandValidator : AbstractValidator<CreateTransferCo
     }
 }
 
+public class CreateHandoverCommandValidator : AbstractValidator<CreateHandoverCommand>
+{
+    public CreateHandoverCommandValidator()
+    {
+        RuleFor(command => command.Request).SetValidator(new CreateHandoverRequestValidator());
+    }
+}
+
 public class CreateDisposalCommandValidator : AbstractValidator<CreateDisposalCommand>
 {
     public CreateDisposalCommandValidator()
     {
         RuleFor(command => command.Request).SetValidator(new CreateDisposalRequestValidator());
+    }
+}
+
+public class CreateComplianceCommandValidator : AbstractValidator<CreateComplianceCommand>
+{
+    public CreateComplianceCommandValidator()
+    {
+        RuleFor(command => command.Request).SetValidator(new CreateComplianceRecordRequestValidator());
     }
 }
 

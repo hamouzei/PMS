@@ -31,7 +31,9 @@ public enum DocumentType
     RMRN = 7,
     RMTN = 8,
     Disposal = 9,
-    AnnualInventory = 10
+    AnnualInventory = 10,
+    Handover = 11,
+    Compliance = 12
 }
 
 public enum WorkflowStatus
@@ -50,7 +52,8 @@ public enum WorkflowStatus
     Returned = 12,
     Transferred = 13,
     Disposed = 14,
-    Closed = 15
+    Closed = 15,
+    HandedOver = 16
 }
 
 public enum StockTransactionType
@@ -90,4 +93,13 @@ public enum DisposalMethod
     Tendering = 2,
     Scrapping = 3,
     Other = 4
+}
+
+public enum FieldDataType
+{
+    Text = 1,
+    Number = 2,
+    Date = 3,
+    Boolean = 4,
+    Selection = 5
 }

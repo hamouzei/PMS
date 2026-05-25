@@ -9,6 +9,7 @@ namespace PMS.Persistence.Services;
 
 public class PasWorkflowService(PMSDbContext context) : IPasWorkflowService
 {
+    // ── SR007: Register Opening Balance ──────────────────────────────────────
     public async Task<InventoryStock> RegisterOpeningBalance(
         RegisterOpeningBalanceRequest request,
         CancellationToken cancellationToken = default)
@@ -42,6 +43,7 @@ public class PasWorkflowService(PMSDbContext context) : IPasWorkflowService
         return stock;
     }
 
+    // ── SR007: Adjust Stock ──────────────────────────────────────────────────
     public async Task<InventoryStock> AdjustStock(
         StockAdjustmentRequest request,
         CancellationToken cancellationToken = default)
@@ -76,6 +78,7 @@ public class PasWorkflowService(PMSDbContext context) : IPasWorkflowService
         return stock;
     }
 
+    // ── SR005: Create Store Request ──────────────────────────────────────────
     public async Task<ServiceRequest> CreateStoreRequest(
         CreateStoreRequestRequest request,
         CancellationToken cancellationToken = default)
@@ -109,6 +112,7 @@ public class PasWorkflowService(PMSDbContext context) : IPasWorkflowService
         return serviceRequest;
     }
 
+    // ── SR005: Approve Store Request ─────────────────────────────────────────
     public async Task<ServiceRequest> ApproveStoreRequest(
         Guid id,
         ApproveRequest request,
@@ -168,6 +172,7 @@ public class PasWorkflowService(PMSDbContext context) : IPasWorkflowService
         return serviceRequest;
     }
 
+    // ── SR005: Reject Store Request ──────────────────────────────────────────
     public async Task<ServiceRequest> RejectStoreRequest(
         Guid id,
         RejectRequest request,
@@ -186,10 +191,30 @@ public class PasWorkflowService(PMSDbContext context) : IPasWorkflowService
         return serviceRequest;
     }
 
+    // ── SR006: Create Purchase Request ───────────────────────────────────────
     public async Task<PurchaseRequest> CreatePurchaseRequest(
         CreatePurchaseRequestRequest request,
         CancellationToken cancellationToken = default)
     {
+        // SR006: Budget validation — check available budget if present
+        if (request.EstimatedBudget.HasValue)
+        {
+            var requester = await context.Users.FindAsync([request.RequesterId], cancellationToken);
+            if (requester is not null)
+            {
+                var budget = await context.BudgetAllocations
+                    .Where(b => b.FiscalYear == DateTime.UtcNow.Year
+                        && (b.Department == null || b.Department == requester.Department))
+                    .FirstOrDefaultAsync(cancellationToken);
+
+                if (budget is not null && budget.RemainingAmount < request.EstimatedBudget.Value)
+                {
+                    throw new BusinessRuleException(
+                        $"Estimated budget ({request.EstimatedBudget.Value:N2}) exceeds remaining departmental budget ({budget.RemainingAmount:N2}).");
+                }
+            }
+        }
+
         var purchaseRequest = new PurchaseRequest
         {
             PrNumber = await NextNumber(DocumentType.PR, cancellationToken),
@@ -215,6 +240,7 @@ public class PasWorkflowService(PMSDbContext context) : IPasWorkflowService
         return purchaseRequest;
     }
 
+    // ── SR006: Approve Purchase Request ──────────────────────────────────────
     public async Task<PurchaseRequest> ApprovePurchaseRequest(
         Guid id,
         ApproveRequest request,
@@ -224,6 +250,25 @@ public class PasWorkflowService(PMSDbContext context) : IPasWorkflowService
             ?? throw new BusinessRuleException("Purchase request was not found.");
 
         EnsureTransition(purchaseRequest.Status, WorkflowStatus.Approved, purchaseRequest.PrNumber);
+
+        // SR006: Update budget utilization
+        if (purchaseRequest.EstimatedBudget.HasValue)
+        {
+            var requester = await context.Users.FindAsync([purchaseRequest.RequesterId], cancellationToken);
+            if (requester is not null)
+            {
+                var budget = await context.BudgetAllocations
+                    .Where(b => b.FiscalYear == DateTime.UtcNow.Year
+                        && (b.Department == null || b.Department == requester.Department))
+                    .FirstOrDefaultAsync(cancellationToken);
+
+                if (budget is not null)
+                {
+                    budget.UtilizedAmount += purchaseRequest.EstimatedBudget.Value;
+                }
+            }
+        }
+
         purchaseRequest.ApprovedById = request.ActorId;
         purchaseRequest.Status = WorkflowStatus.Approved;
         AddNotification(purchaseRequest.RequesterId, "Purchase request approved", $"Purchase request {purchaseRequest.PrNumber} was approved.", purchaseRequest.Id, purchaseRequest.PrNumber);
@@ -232,6 +277,26 @@ public class PasWorkflowService(PMSDbContext context) : IPasWorkflowService
         return purchaseRequest;
     }
 
+    // ── SR006: Reject Purchase Request (was MISSING) ─────────────────────────
+    public async Task<PurchaseRequest> RejectPurchaseRequest(
+        Guid id,
+        RejectRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var purchaseRequest = await context.PurchaseRequests.SingleOrDefaultAsync(value => value.Id == id, cancellationToken)
+            ?? throw new BusinessRuleException("Purchase request was not found.");
+
+        EnsureTransition(purchaseRequest.Status, WorkflowStatus.Rejected, purchaseRequest.PrNumber);
+        purchaseRequest.ApprovedById = request.ActorId;
+        purchaseRequest.Status = WorkflowStatus.Rejected;
+        purchaseRequest.RejectionReason = request.Reason;
+        AddNotification(purchaseRequest.RequesterId, "Purchase request rejected", request.Reason, purchaseRequest.Id, purchaseRequest.PrNumber);
+        AddAudit(request.ActorId, "Rejected", nameof(PurchaseRequest), purchaseRequest.Id, request.Reason);
+        await context.SaveChangesAsync(cancellationToken);
+        return purchaseRequest;
+    }
+
+    // ── SR009: Create Receiving Note ─────────────────────────────────────────
     public async Task<ReceivingNote> CreateReceivingNote(
         CreateReceivingNoteRequest request,
         CancellationToken cancellationToken = default)
@@ -281,6 +346,7 @@ public class PasWorkflowService(PMSDbContext context) : IPasWorkflowService
         return receivingNote;
     }
 
+    // ── SR0011: Record Inspection ────────────────────────────────────────────
     public async Task<InspectionLog> RecordInspection(
         RecordInspectionRequest request,
         CancellationToken cancellationToken = default)
@@ -315,6 +381,7 @@ public class PasWorkflowService(PMSDbContext context) : IPasWorkflowService
         return inspection;
     }
 
+    // ── SR009/SR007: Release Receiving to Stock ──────────────────────────────
     public async Task<ReceivingNote> ReleaseReceivingToStock(
         ReleaseReceivingRequest request,
         CancellationToken cancellationToken = default)
@@ -374,6 +441,7 @@ public class PasWorkflowService(PMSDbContext context) : IPasWorkflowService
         return receivingNote;
     }
 
+    // ── SR0010: Issue Approved Request ───────────────────────────────────────
     public async Task<StoreIssueVoucher> IssueApprovedRequest(
         IssueStockRequest request,
         CancellationToken cancellationToken = default)
@@ -462,6 +530,7 @@ public class PasWorkflowService(PMSDbContext context) : IPasWorkflowService
         return voucher;
     }
 
+    // ── SR0012: Create Return ────────────────────────────────────────────────
     public async Task<PropertyReturn> CreateReturn(
         CreateReturnRequest request,
         CancellationToken cancellationToken = default)
@@ -491,6 +560,7 @@ public class PasWorkflowService(PMSDbContext context) : IPasWorkflowService
         return propertyReturn;
     }
 
+    // ── SR0012: Approve Return ───────────────────────────────────────────────
     public async Task<PropertyReturn> ApproveReturn(
         Guid id,
         ApproveRequest request,
@@ -535,6 +605,7 @@ public class PasWorkflowService(PMSDbContext context) : IPasWorkflowService
         return propertyReturn;
     }
 
+    // ── FR0014: Create Transfer ──────────────────────────────────────────────
     public async Task<PropertyTransfer> CreateTransfer(
         CreateTransferRequest request,
         CancellationToken cancellationToken = default)
@@ -562,6 +633,7 @@ public class PasWorkflowService(PMSDbContext context) : IPasWorkflowService
         return transfer;
     }
 
+    // ── FR0014: Approve Transfer ─────────────────────────────────────────────
     public async Task<PropertyTransfer> ApproveTransfer(
         Guid id,
         ApproveRequest request,
@@ -589,6 +661,77 @@ public class PasWorkflowService(PMSDbContext context) : IPasWorkflowService
         return transfer;
     }
 
+    // ── FR0015: Create Handover (NEW — was entirely missing) ─────────────────
+    public async Task<PropertyHandover> CreateHandover(
+        CreateHandoverRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        if (request.Details.Count == 0)
+        {
+            throw new BusinessRuleException("Handover requires at least one item.");
+        }
+
+        var handover = new PropertyHandover
+        {
+            HandoverNumber = await NextNumber(DocumentType.Handover, cancellationToken),
+            HandoverFromId = request.HandoverFromId,
+            HandoverToId = request.HandoverToId,
+            Purpose = request.Purpose,
+            FromLocation = request.FromLocation,
+            ToLocation = request.ToLocation,
+            Remarks = request.Remarks,
+            Status = WorkflowStatus.PendingApproval,
+            Details = request.Details.Select(line => new PropertyHandoverDetail
+            {
+                ItemId = line.ItemId,
+                Quantity = line.Quantity,
+                TagNumber = line.TagNumber,
+                SerialNumber = line.SerialNumber,
+                FarnNumber = line.FarnNumber,
+                RmrnNumber = line.RmrnNumber,
+                FaivNumber = line.FaivNumber
+            }).ToList()
+        };
+
+        context.PropertyHandovers.Add(handover);
+        AddAttachments(DocumentType.Handover, handover.Id, request.Attachments);
+        AddNotification(request.HandoverToId, "Property handover submitted", $"Handover {handover.HandoverNumber} is pending approval.", handover.Id, handover.HandoverNumber);
+        AddAudit(request.HandoverFromId, "Submitted", nameof(PropertyHandover), handover.Id, handover.HandoverNumber);
+        await context.SaveChangesAsync(cancellationToken);
+        return handover;
+    }
+
+    // ── FR0015: Approve Handover (NEW) ───────────────────────────────────────
+    public async Task<PropertyHandover> ApproveHandover(
+        Guid id,
+        ApproveRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
+        var handover = await context.PropertyHandovers
+            .Include(value => value.Details)
+            .SingleOrDefaultAsync(value => value.Id == id, cancellationToken)
+            ?? throw new BusinessRuleException("Property handover was not found.");
+
+        EnsureTransition(handover.Status, WorkflowStatus.HandedOver, handover.HandoverNumber);
+
+        foreach (var detail in handover.Details)
+        {
+            await ReduceCustody(handover.HandoverFromId, detail.ItemId, detail.Quantity, cancellationToken);
+            await AddCustody(handover.HandoverToId, detail.ItemId, detail.Quantity, handover.HandoverNumber, detail.TagNumber, detail.SerialNumber, cancellationToken);
+        }
+
+        handover.AuthorizedById = request.ActorId;
+        handover.Status = WorkflowStatus.HandedOver;
+        AddNotification(handover.HandoverToId, "Property handover approved", $"Handover {handover.HandoverNumber} was approved.", handover.Id, handover.HandoverNumber);
+        AddNotification(handover.HandoverFromId, "Property handover completed", $"Handover {handover.HandoverNumber} was handed over.", handover.Id, handover.HandoverNumber);
+        AddAudit(request.ActorId, "ApprovedHandover", nameof(PropertyHandover), handover.Id, handover.HandoverNumber);
+        await context.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+        return handover;
+    }
+
+    // ── FR0017: Create Disposal ──────────────────────────────────────────────
     public async Task<DisposalRecord> CreateDisposal(
         CreateDisposalRequest request,
         CancellationToken cancellationToken = default)
@@ -617,6 +760,7 @@ public class PasWorkflowService(PMSDbContext context) : IPasWorkflowService
         return disposal;
     }
 
+    // ── FR0017: Approve Disposal ─────────────────────────────────────────────
     public async Task<DisposalRecord> ApproveDisposal(
         Guid id,
         ApproveRequest request,
@@ -665,6 +809,46 @@ public class PasWorkflowService(PMSDbContext context) : IPasWorkflowService
         return disposal;
     }
 
+    // ── FR0016: Create Compliance Record (NEW — was entirely missing) ────────
+    public async Task<ComplianceRecord> CreateComplianceRecord(
+        CreateComplianceRecordRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var compliance = new ComplianceRecord
+        {
+            ComplianceNumber = await NextNumber(DocumentType.Compliance, cancellationToken),
+            InventoryId = request.InventoryId,
+            ReviewedById = request.ReviewedById,
+            Findings = request.Findings,
+            Recommendations = request.Recommendations,
+            CorrectiveActions = request.CorrectiveActions,
+            Status = WorkflowStatus.Submitted
+        };
+
+        context.ComplianceRecords.Add(compliance);
+        AddNotification(null, UserRole.PropertyAdmin, "Compliance review submitted", $"Compliance {compliance.ComplianceNumber} is pending review.", compliance.Id, compliance.ComplianceNumber);
+        AddAudit(request.ReviewedById, "Created", nameof(ComplianceRecord), compliance.Id, compliance.ComplianceNumber);
+        await context.SaveChangesAsync(cancellationToken);
+        return compliance;
+    }
+
+    // ── FR0016: Close Compliance Record (NEW) ────────────────────────────────
+    public async Task<ComplianceRecord> CloseComplianceRecord(
+        Guid id,
+        ApproveRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var compliance = await context.ComplianceRecords.SingleOrDefaultAsync(value => value.Id == id, cancellationToken)
+            ?? throw new BusinessRuleException("Compliance record was not found.");
+
+        EnsureTransition(compliance.Status, WorkflowStatus.Closed, compliance.ComplianceNumber);
+        compliance.Status = WorkflowStatus.Closed;
+        AddAudit(request.ActorId, "Closed", nameof(ComplianceRecord), compliance.Id, request.Remark);
+        await context.SaveChangesAsync(cancellationToken);
+        return compliance;
+    }
+
+    // ── FR0020: Create Annual Inventory ──────────────────────────────────────
     public async Task<AnnualInventory> CreateAnnualInventory(
         CreateAnnualInventoryRequest request,
         CancellationToken cancellationToken = default)
@@ -692,6 +876,7 @@ public class PasWorkflowService(PMSDbContext context) : IPasWorkflowService
         return annualInventory;
     }
 
+    // ── FR0020: Complete Annual Inventory ─────────────────────────────────────
     public async Task<AnnualInventory> CompleteAnnualInventory(
         Guid id,
         ApproveRequest request,
@@ -713,6 +898,28 @@ public class PasWorkflowService(PMSDbContext context) : IPasWorkflowService
         await context.SaveChangesAsync(cancellationToken);
         return annualInventory;
     }
+
+    // ── SR008/SR009: Generate ECX-format Tag Number ──────────────────────────
+    public async Task<string> GenerateTagNumber(
+        Guid warehouseId,
+        PropertyType propertyType,
+        CancellationToken cancellationToken = default)
+    {
+        var warehouse = await context.Warehouses.FindAsync([warehouseId], cancellationToken)
+            ?? throw new BusinessRuleException("Warehouse was not found.");
+
+        var typeCode = propertyType == PropertyType.FixedAsset ? "1" : "2";
+        var locationCode = warehouse.LocationCode;
+
+        // Count existing tags for this pattern to generate next sequence
+        var prefix = $"ECX-{locationCode}-{typeCode}";
+        var existingCount = await context.Set<ReceivingNoteDetail>()
+            .CountAsync(d => d.TagNumber != null && d.TagNumber.StartsWith(prefix), cancellationToken);
+
+        return $"{prefix}-{existingCount + 1:00000}";
+    }
+
+    // ── Private helpers ──────────────────────────────────────────────────────
 
     private async Task<string> NextNumber(DocumentType documentType, CancellationToken cancellationToken)
     {
@@ -947,9 +1154,9 @@ public class PasWorkflowService(PMSDbContext context) : IPasWorkflowService
         new Dictionary<WorkflowStatus, WorkflowStatus[]>
         {
             [WorkflowStatus.Draft] = [WorkflowStatus.Submitted, WorkflowStatus.Cancelled],
-            [WorkflowStatus.Submitted] = [WorkflowStatus.PendingApproval, WorkflowStatus.Approved, WorkflowStatus.Rejected, WorkflowStatus.Cancelled, WorkflowStatus.Returned, WorkflowStatus.Transferred, WorkflowStatus.Disposed, WorkflowStatus.Closed],
-            [WorkflowStatus.PendingApproval] = [WorkflowStatus.Approved, WorkflowStatus.Rejected, WorkflowStatus.Cancelled],
-            [WorkflowStatus.Approved] = [WorkflowStatus.Issued, WorkflowStatus.Closed, WorkflowStatus.Disposed, WorkflowStatus.Transferred, WorkflowStatus.Returned],
+            [WorkflowStatus.Submitted] = [WorkflowStatus.PendingApproval, WorkflowStatus.Approved, WorkflowStatus.Rejected, WorkflowStatus.Cancelled, WorkflowStatus.Returned, WorkflowStatus.Transferred, WorkflowStatus.Disposed, WorkflowStatus.Closed, WorkflowStatus.HandedOver],
+            [WorkflowStatus.PendingApproval] = [WorkflowStatus.Approved, WorkflowStatus.Rejected, WorkflowStatus.Cancelled, WorkflowStatus.HandedOver],
+            [WorkflowStatus.Approved] = [WorkflowStatus.Issued, WorkflowStatus.Closed, WorkflowStatus.Disposed, WorkflowStatus.Transferred, WorkflowStatus.Returned, WorkflowStatus.HandedOver],
             [WorkflowStatus.Received] = [WorkflowStatus.InspectionPending, WorkflowStatus.Closed],
             [WorkflowStatus.InspectionPending] = [WorkflowStatus.InspectionPassed, WorkflowStatus.InspectionFailed],
             [WorkflowStatus.InspectionPassed] = [WorkflowStatus.Closed],
@@ -957,6 +1164,7 @@ public class PasWorkflowService(PMSDbContext context) : IPasWorkflowService
             [WorkflowStatus.Issued] = [WorkflowStatus.Closed, WorkflowStatus.Returned],
             [WorkflowStatus.Returned] = [WorkflowStatus.Closed],
             [WorkflowStatus.Transferred] = [WorkflowStatus.Closed],
-            [WorkflowStatus.Disposed] = [WorkflowStatus.Closed]
+            [WorkflowStatus.Disposed] = [WorkflowStatus.Closed],
+            [WorkflowStatus.HandedOver] = [WorkflowStatus.Closed]
         };
 }

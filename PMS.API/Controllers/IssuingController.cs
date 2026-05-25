@@ -15,14 +15,37 @@ namespace PMS.API.Controllers;
 public class IssuingController(PMSDbContext context, IMediator mediator) : ControllerBase
 {
     [HttpGet("vouchers")]
-    public async Task<IActionResult> GetVouchers(CancellationToken cancellationToken)
+    public async Task<IActionResult> GetVouchers(
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 20,
+        CancellationToken cancellationToken = default)
     {
-        return Ok(await context.StoreIssueVouchers
-            .AsNoTracking()
-            .Include(value => value.Details)
-            .ThenInclude(value => value.Item)
-            .OrderByDescending(value => value.IssueDate)
-            .ToListAsync(cancellationToken));
+        var query = context.StoreIssueVouchers.AsNoTracking()
+            .Include(v => v.IssuedBy).Include(v => v.ServiceRequest).AsQueryable();
+
+        var totalCount = await query.CountAsync(cancellationToken);
+        var items = await query.OrderByDescending(v => v.IssueDate)
+            .Skip((pageNumber - 1) * pageSize).Take(pageSize)
+            .Select(v => new
+            {
+                v.Id, v.SivNumber, v.FaivNumber, v.Status, v.IssueDate,
+                VoucherType = v.VoucherType.ToString(),
+                IssuedBy = v.IssuedBy != null ? v.IssuedBy.FullName : "",
+                SrNumber = v.ServiceRequest != null ? v.ServiceRequest.SrNumber : ""
+            })
+            .ToListAsync(cancellationToken);
+
+        return Ok(new PagedResult<object>(items.Cast<object>().ToList(), pageNumber, pageSize, totalCount));
+    }
+
+    [HttpGet("vouchers/{id:guid}")]
+    public async Task<IActionResult> GetVoucherById(Guid id, CancellationToken cancellationToken)
+    {
+        var voucher = await context.StoreIssueVouchers.AsNoTracking()
+            .Include(v => v.Details).ThenInclude(d => d.Item)
+            .Include(v => v.IssuedBy).Include(v => v.ServiceRequest)
+            .SingleOrDefaultAsync(v => v.Id == id, cancellationToken);
+        return voucher is null ? NotFound() : Ok(voucher);
     }
 
     [HttpPost]

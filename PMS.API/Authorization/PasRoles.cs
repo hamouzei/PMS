@@ -18,4 +18,6 @@ public static class PasRoles
     public const string Approvers = DepartmentManager + "," + PropertyAdmin;
     public const string StockActors = PropertyAdmin + "," + Storekeeper;
     public const string ReportActors = PropertyAdmin + "," + DepartmentManager + "," + ComplianceOfficer + "," + ReportViewer + "," + FinanceOfficer;
+    public const string HandoverActors = PropertyAdmin + "," + DepartmentManager + "," + Storekeeper;
+    public const string ComplianceActors = ComplianceOfficer + "," + PropertyAdmin;
 }

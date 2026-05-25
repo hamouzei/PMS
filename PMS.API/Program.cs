@@ -39,22 +39,15 @@ if (string.IsNullOrWhiteSpace(jwtOptions.SigningKey))
     throw new InvalidOperationException("JWT signing key is not configured. Set Jwt__SigningKey or use dotnet user-secrets.");
 }
 
+// P0 Security fix: Header auth only in Development; production uses Bearer-only
+var isDevelopment = builder.Environment.IsDevelopment();
+
 const string smartAuthenticationScheme = "Smart";
-builder.Services
+var authBuilder = builder.Services
     .AddAuthentication(options =>
     {
-        options.DefaultScheme = smartAuthenticationScheme;
-        options.DefaultChallengeScheme = smartAuthenticationScheme;
-    })
-    .AddPolicyScheme(smartAuthenticationScheme, smartAuthenticationScheme, options =>
-    {
-        options.ForwardDefaultSelector = context =>
-        {
-            var authorization = context.Request.Headers.Authorization.ToString();
-            return authorization.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase)
-                ? JwtBearerDefaults.AuthenticationScheme
-                : HeaderAuthenticationHandler.SchemeName;
-        };
+        options.DefaultScheme = isDevelopment ? smartAuthenticationScheme : JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = isDevelopment ? smartAuthenticationScheme : JwtBearerDefaults.AuthenticationScheme;
     })
     .AddJwtBearer(options =>
     {
@@ -69,10 +62,26 @@ builder.Services
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.SigningKey)),
             ClockSkew = TimeSpan.FromMinutes(1)
         };
-    })
-    .AddScheme<AuthenticationSchemeOptions, HeaderAuthenticationHandler>(
-        HeaderAuthenticationHandler.SchemeName,
-        _ => { });
+    });
+
+// Only register HeaderAuthenticationHandler in Development
+if (isDevelopment)
+{
+    authBuilder
+        .AddPolicyScheme(smartAuthenticationScheme, smartAuthenticationScheme, options =>
+        {
+            options.ForwardDefaultSelector = context =>
+            {
+                var authorization = context.Request.Headers.Authorization.ToString();
+                return authorization.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase)
+                    ? JwtBearerDefaults.AuthenticationScheme
+                    : HeaderAuthenticationHandler.SchemeName;
+            };
+        })
+        .AddScheme<AuthenticationSchemeOptions, HeaderAuthenticationHandler>(
+            HeaderAuthenticationHandler.SchemeName,
+            _ => { });
+}
 
 builder.Services.AddAuthorization();
 
@@ -81,7 +90,9 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AngularClient", policy =>
     {
         policy
-            .WithOrigins("http://localhost:4200")
+            .WithOrigins(
+                "http://localhost:4200",
+                builder.Configuration.GetValue<string>("Cors:AllowedOrigin") ?? "http://localhost:4200")
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
@@ -131,6 +142,7 @@ app.UseHttpsRedirection();
 app.UseCors("AngularClient");
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseMiddleware<AuditUserMiddleware>();
 
 app.MapControllers();
 

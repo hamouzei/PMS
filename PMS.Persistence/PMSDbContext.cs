@@ -6,6 +6,10 @@ namespace PMS.Persistence;
 
 public class PMSDbContext(DbContextOptions<PMSDbContext> options) : DbContext(options)
 {
+    /// <summary>
+    /// Set by middleware/DI to populate audit fields (CreatedBy/UpdatedBy).
+    /// </summary>
+    public string? CurrentUser { get; set; }
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<ItemMaster> ItemMasters => Set<ItemMaster>();
     public DbSet<AppUser> Users => Set<AppUser>();
@@ -35,6 +39,26 @@ public class PMSDbContext(DbContextOptions<PMSDbContext> options) : DbContext(op
     public DbSet<DisposalRecord> DisposalRecords => Set<DisposalRecord>();
     public DbSet<AnnualInventory> AnnualInventories => Set<AnnualInventory>();
     public DbSet<AnnualInventoryLine> AnnualInventoryLines => Set<AnnualInventoryLine>();
+
+    // SR004 / FR0018: Safety Box Management
+    public DbSet<SafetyBox> SafetyBoxes => Set<SafetyBox>();
+    public DbSet<SafetyBoxShelf> SafetyBoxShelves => Set<SafetyBoxShelf>();
+
+    // SR003: Custom Property Fields
+    public DbSet<PropertyField> PropertyFields => Set<PropertyField>();
+    public DbSet<PropertyFieldValue> PropertyFieldValues => Set<PropertyFieldValue>();
+
+    // FR0015: Property Handover
+    public DbSet<PropertyHandover> PropertyHandovers => Set<PropertyHandover>();
+    public DbSet<PropertyHandoverDetail> PropertyHandoverDetails => Set<PropertyHandoverDetail>();
+
+    // FR0016: Compliance Management
+    public DbSet<ComplianceRecord> ComplianceRecords => Set<ComplianceRecord>();
+
+    // SR006: Budget Allocation
+    public DbSet<BudgetAllocation> BudgetAllocations => Set<BudgetAllocation>();
+
+    // FR0019: Report views
     public DbSet<StockSummaryReport> StockSummaryReports => Set<StockSummaryReport>();
     public DbSet<PropertyMovementReport> PropertyMovementReports => Set<PropertyMovementReport>();
 
@@ -80,9 +104,11 @@ public class PMSDbContext(DbContextOptions<PMSDbContext> options) : DbContext(op
         return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
     }
 
+    // P3 Fix: Populate CreatedBy/UpdatedBy from JWT claims
     private void ApplyAuditFields()
     {
         var utcNow = DateTime.UtcNow;
+        var currentUser = CurrentUser;
 
         foreach (var entry in ChangeTracker.Entries<BaseDomainEntity>())
         {
@@ -95,12 +121,16 @@ public class PMSDbContext(DbContextOptions<PMSDbContext> options) : DbContext(op
 
                 entry.Entity.CreatedDate = utcNow;
                 entry.Entity.UpdatedDate = utcNow;
+                entry.Entity.CreatedBy ??= currentUser;
+                entry.Entity.UpdatedBy ??= currentUser;
             }
 
             if (entry.State == EntityState.Modified)
             {
                 entry.Property(entity => entity.CreatedDate).IsModified = false;
+                entry.Property(entity => entity.CreatedBy).IsModified = false;
                 entry.Entity.UpdatedDate = utcNow;
+                entry.Entity.UpdatedBy = currentUser ?? entry.Entity.UpdatedBy;
             }
         }
     }
@@ -142,6 +172,9 @@ public class PMSDbContext(DbContextOptions<PMSDbContext> options) : DbContext(op
             entity.Property(value => value.WarehouseName).HasMaxLength(200).IsRequired();
             entity.Property(value => value.LocationCode).HasMaxLength(80).IsRequired();
             entity.HasIndex(value => value.LocationCode).IsUnique();
+            entity.HasOne(value => value.ParentWarehouse)
+                .WithMany(value => value.ChildLocations)
+                .HasForeignKey(value => value.ParentWarehouseId);
         });
 
         modelBuilder.Entity<ShelfLocation>(entity =>
@@ -277,6 +310,55 @@ public class PMSDbContext(DbContextOptions<PMSDbContext> options) : DbContext(op
             entity.HasIndex(value => new { value.FiscalYear, value.Location });
         });
 
+        // ── SR004 / FR0018: Safety Box ──
+        modelBuilder.Entity<SafetyBox>(entity =>
+        {
+            entity.Property(value => value.BoxNumber).HasMaxLength(80).IsRequired();
+            entity.HasIndex(value => value.BoxNumber).IsUnique();
+        });
+
+        modelBuilder.Entity<SafetyBoxShelf>(entity =>
+        {
+            entity.Property(value => value.ShelfLabel).HasMaxLength(80).IsRequired();
+            entity.Property(value => value.WeightCapacity).HasPrecision(18, 2);
+            entity.Property(value => value.VolumeCapacity).HasPrecision(18, 2);
+        });
+
+        // ── SR003: Custom Property Fields ──
+        modelBuilder.Entity<PropertyField>(entity =>
+        {
+            entity.Property(value => value.FieldName).HasMaxLength(150).IsRequired();
+            entity.HasIndex(value => value.FieldName).IsUnique();
+        });
+
+        modelBuilder.Entity<PropertyFieldValue>(entity =>
+        {
+            entity.HasIndex(value => new { value.PropertyFieldId, value.ItemId }).IsUnique();
+        });
+
+        // ── FR0015: Property Handover ──
+        modelBuilder.Entity<PropertyHandover>(entity =>
+        {
+            entity.Property(value => value.HandoverNumber).HasMaxLength(80).IsRequired();
+            entity.HasIndex(value => value.HandoverNumber).IsUnique();
+        });
+
+        // ── FR0016: Compliance ──
+        modelBuilder.Entity<ComplianceRecord>(entity =>
+        {
+            entity.Property(value => value.ComplianceNumber).HasMaxLength(80).IsRequired();
+            entity.HasIndex(value => value.ComplianceNumber).IsUnique();
+        });
+
+        // ── SR006: Budget Allocation ──
+        modelBuilder.Entity<BudgetAllocation>(entity =>
+        {
+            entity.Property(value => value.AllocatedAmount).HasPrecision(18, 2);
+            entity.Property(value => value.UtilizedAmount).HasPrecision(18, 2);
+            entity.HasIndex(value => new { value.FiscalYear, value.Department, value.Division }).IsUnique();
+        });
+
+        // ── FR0019: DB views ──
         modelBuilder.Entity<StockSummaryReport>(entity =>
         {
             entity.HasNoKey();

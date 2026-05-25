@@ -14,5 +14,9 @@ public class MappingProfile : Profile
         CreateMap<CreateWarehouseRequest, Warehouse>();
         CreateMap<CreateShelfLocationRequest, ShelfLocation>();
         CreateMap<CreateSupplierRequest, Supplier>();
+        CreateMap<CreateSafetyBoxRequest, SafetyBox>();
+        CreateMap<CreateSafetyBoxShelfRequest, SafetyBoxShelf>();
+        CreateMap<CreatePropertyFieldRequest, PropertyField>();
+        CreateMap<CreateBudgetAllocationRequest, BudgetAllocation>();
     }
 }

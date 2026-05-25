@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PMS.API.Authorization;
+using PMS.Application.DTO;
 using PMS.Persistence;
 
 namespace PMS.API.Controllers;
@@ -12,19 +13,34 @@ namespace PMS.API.Controllers;
 public class CustodyController(PMSDbContext context) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> Get([FromQuery] Guid? custodianId, CancellationToken cancellationToken)
+    public async Task<IActionResult> Get(
+        [FromQuery] Guid? custodianId,
+        [FromQuery] Guid? itemId,
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 50,
+        CancellationToken cancellationToken = default)
     {
-        var query = context.UserCustodies
-            .AsNoTracking()
-            .Include(value => value.Custodian)
-            .Include(value => value.Item)
+        var query = context.UserCustodies.AsNoTracking()
+            .Include(v => v.Custodian).Include(v => v.Item)
+            .Where(v => v.Quantity > 0)
             .AsQueryable();
 
-        if (custodianId.HasValue)
-        {
-            query = query.Where(value => value.CustodianId == custodianId.Value);
-        }
+        if (custodianId.HasValue) query = query.Where(v => v.CustodianId == custodianId.Value);
+        if (itemId.HasValue) query = query.Where(v => v.ItemId == itemId.Value);
 
-        return Ok(await query.OrderBy(value => value.Custodian!.FullName).ToListAsync(cancellationToken));
+        var totalCount = await query.CountAsync(cancellationToken);
+        var items = await query.OrderBy(v => v.Custodian!.FullName)
+            .Skip((pageNumber - 1) * pageSize).Take(pageSize)
+            .Select(v => new
+            {
+                v.Id, v.Quantity, v.TagNumber, v.SerialNumber, v.SourceDocumentNumber,
+                Custodian = v.Custodian != null ? v.Custodian.FullName : "",
+                CustodianId = v.CustodianId,
+                ItemName = v.Item != null ? v.Item.ItemName : "",
+                ItemId = v.ItemId
+            })
+            .ToListAsync(cancellationToken);
+
+        return Ok(new PagedResult<object>(items.Cast<object>().ToList(), pageNumber, pageSize, totalCount));
     }
 }
