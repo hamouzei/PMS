@@ -9,7 +9,7 @@ import { ThemeService } from '../../core/services/theme.service';
 @Component({
   selector: 'app-topbar',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule],
   template: `
     <header class="topbar">
       <div class="topbar-left">

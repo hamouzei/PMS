@@ -14,7 +14,7 @@ export interface MenuItem {
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive, HasRoleDirective],
+  imports: [CommonModule, RouterLink, RouterLinkActive],
   template: `
     <aside class="sidebar">
       <nav class="sidebar-nav">

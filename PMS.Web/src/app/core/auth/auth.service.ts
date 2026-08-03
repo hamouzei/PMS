@@ -17,7 +17,7 @@ export class AuthService {
   private readonly tokenStorage = inject(TokenStorageService);
 
   public login(request: LoginRequest): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${environment.apiUrl}/auth/login`, request).pipe(
+    return this.http.post<LoginResponse>('/auth/login', request).pipe(
       tap((response) => {
         this.tokenStorage.setToken(response.token);
         this.tokenStorage.setRefreshToken(response.refreshToken);
@@ -41,7 +41,7 @@ export class AuthService {
     const refreshToken = this.tokenStorage.getRefreshToken();
     const payload: RefreshTokenRequest = { refreshToken: refreshToken || '' };
 
-    return this.http.post<LoginResponse>(`${environment.apiUrl}/auth/refresh`, payload).pipe(
+    return this.http.post<LoginResponse>('/auth/refresh', payload).pipe(
       tap((response) => {
         this.tokenStorage.setToken(response.token);
         this.tokenStorage.setRefreshToken(response.refreshToken);

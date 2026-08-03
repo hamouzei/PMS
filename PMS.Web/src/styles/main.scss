@@ -1,6 +1,6 @@
-@import 'variables';
-@import 'typography';
-@import 'mixins';
+@use 'variables';
+@use 'typography';
+@use 'mixins';
 
 *, *::before, *::after {
   box-sizing: border-box;
