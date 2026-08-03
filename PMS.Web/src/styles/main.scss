@@ -1,0 +1,41 @@
+@import 'variables';
+@import 'typography';
+@import 'mixins';
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  background: none;
+}
+
+a {
+  color: var(--ecx-info);
+  text-decoration: none;
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+/* Utilities */
+.text-navy { color: var(--ecx-navy-primary); }
+.text-gold { color: var(--ecx-gold-primary); }
+.text-success { color: var(--ecx-success); }
+.text-warning { color: var(--ecx-warning); }
+.text-danger { color: var(--ecx-danger); }
+
+.bg-surface { background-color: var(--bg-surface); }
+.border-surface { border: 1px solid var(--border-color); }

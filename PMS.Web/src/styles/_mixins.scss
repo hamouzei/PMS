@@ -1,0 +1,43 @@
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@mixin responsive-grid($min-width: 280px, $gap: 1.25rem) {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax($min-width, 1fr));
+  gap: $gap;
+}
+
+@mixin card-surface {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--transition-fast);
+}
+
+// Media Query Mixins
+$sm: 576px;
+$md: 768px;
+$lg: 992px;
+$xl: 1200px;
+
+@mixin respond-to($breakpoint) {
+  @if $breakpoint == 'sm' {
+    @media (max-width: $sm) { @content; }
+  } @else if $breakpoint == 'md' {
+    @media (max-width: $md) { @content; }
+  } @else if $breakpoint == 'lg' {
+    @media (max-width: $lg) { @content; }
+  } @else if $breakpoint == 'xl' {
+    @media (max-width: $xl) { @content; }
+  }
+}

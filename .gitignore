@@ -9,3 +9,7 @@ obj/
 TestResults/
 coverage/
 *.nupkg
+node_modules/
+dist/
+.angular/
+.npm/
