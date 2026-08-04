@@ -37,7 +37,7 @@ import { InputComponent } from '../../shared/components/input/input.component';
           <app-input
             id="employeeId"
             label="Employee ID"
-            placeholder="e.g. EMP-001"
+            placeholder="e.g. PAS-ADMIN"
             [required]="true"
             [errorMessage]="getFieldError('employeeId')"
             formControlName="employeeId">
@@ -72,13 +72,14 @@ import { InputComponent } from '../../shared/components/input/input.component';
         </form>
 
         <div class="demo-credentials-note">
-          <p><strong>Demo Accounts (Password: Password123!):</strong></p>
+          <p><strong>Database Seed Accounts (Password: Pass&#64;123):</strong></p>
           <div class="demo-chips">
-            <span (click)="fillDemo('EMP-001', 'admin')" title="Property Admin">Admin</span>
-            <span (click)="fillDemo('EMP-002', 'storekeeper')" title="Storekeeper">Storekeeper</span>
-            <span (click)="fillDemo('EMP-003', 'reqstaff')" title="Requisitioning Staff">Requisitioner</span>
-            <span (click)="fillDemo('EMP-004', 'deptmgr')" title="Department Manager">Dept Manager</span>
-            <span (click)="fillDemo('EMP-005', 'inspector')" title="Inspector">Inspector</span>
+            <span (click)="fillDemo('PAS-ADMIN', 'admin')" title="Property Admin">Admin</span>
+            <span (click)="fillDemo('PAS-STORE', 'storekeeper')" title="Central Storekeeper">Storekeeper</span>
+            <span (click)="fillDemo('PAS-REQ', 'requester')" title="Requisitioning Staff">Requisitioner</span>
+            <span (click)="fillDemo('PAS-MGR', 'manager')" title="Department Manager">Dept Manager</span>
+            <span (click)="fillDemo('PAS-INSP', 'inspector')" title="Inspection Officer">Inspector</span>
+            <span (click)="fillDemo('PAS-COMP', 'compliance')" title="Compliance Officer">Compliance</span>
           </div>
         </div>
       </div>
@@ -158,9 +159,9 @@ export class LoginComponent {
   generalError: string | null = null;
 
   form = this.fb.nonNullable.group({
-    employeeId: ['EMP-001', Validators.required],
+    employeeId: ['PAS-ADMIN', Validators.required],
     userName: ['admin', Validators.required],
-    password: ['Password123!', Validators.required]
+    password: ['Pass@123', Validators.required]
   });
 
   getFieldError(fieldName: 'employeeId' | 'userName' | 'password'): string {
@@ -175,7 +176,7 @@ export class LoginComponent {
     this.form.patchValue({
       employeeId,
       userName,
-      password: 'Password123!'
+      password: 'Pass@123'
     });
   }
 
