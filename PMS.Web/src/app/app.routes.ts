@@ -59,6 +59,24 @@ export const routes: Routes = [
       {
         path: 'property-handovers',
         loadChildren: () => import('./features/property-handovers/property-handovers.routes').then(m => m.HANDOVER_ROUTES)
+      },
+      // ── Phase 7: Disposal, Annual Inventory & Compliance ────────────
+      {
+        path: 'disposal',
+        loadComponent: () => import('./features/disposal/disposal-list.component').then(m => m.DisposalListComponent)
+      },
+      {
+        path: 'annual-inventory',
+        loadComponent: () => import('./features/annual-inventory/annual-inventory-list.component').then(m => m.AnnualInventoryListComponent)
+      },
+      {
+        path: 'compliance',
+        loadComponent: () => import('./features/compliance/compliance-list.component').then(m => m.ComplianceListComponent)
+      },
+      // ── Phase 8: Reports & Dashboard ────────────────────────────────
+      {
+        path: 'reports',
+        loadChildren: () => import('./features/reports/reports.routes').then(m => m.REPORT_ROUTES)
       }
     ]
   },

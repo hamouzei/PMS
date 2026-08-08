@@ -276,6 +276,10 @@ export interface DisposalRecord {
   disposalMethod: DisposalMethod;
   status: WorkflowStatus;
   notes?: string;
+  item?: { itemName: string; sku: string };
+  custodian?: { fullName: string };
+  approvedBy?: { fullName: string };
+  approvedById?: string;
 }
 
 export interface AnnualInventory {
@@ -287,6 +291,7 @@ export interface AnnualInventory {
   status: WorkflowStatus;
   countDate: string;
   lines: AnnualInventoryLine[];
+  countedBy?: { fullName: string };
 }
 
 export interface AnnualInventoryLine {
@@ -298,6 +303,8 @@ export interface AnnualInventoryLine {
   countedQuantity: number;
   discrepancy: number;
   notes?: string;
+  item?: { itemName: string; sku: string };
+  shelf?: { shelfNumber: string };
 }
 
 export interface ComplianceRecord {
@@ -310,4 +317,6 @@ export interface ComplianceRecord {
   recommendations?: string;
   correctiveActions?: string;
   reviewDate: string;
+  reviewedBy?: { fullName: string };
+  inventory?: { inventoryNumber: string };
 }
