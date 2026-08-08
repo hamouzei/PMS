@@ -56,6 +56,14 @@ export enum DisposalMethod {
   Other = 4
 }
 
+export const PROPERTY_CONDITION_LABELS: Record<number, string> = {
+  [PropertyCondition.New]: 'New',
+  [PropertyCondition.FunctionalUsed]: 'Functional (Used)',
+  [PropertyCondition.Damaged]: 'Damaged',
+  [PropertyCondition.Obsolete]: 'Obsolete',
+  [PropertyCondition.NonFunctional]: 'Non-Functional'
+};
+
 export interface ServiceRequest {
   id: string;
   srNumber: string;
@@ -66,6 +74,8 @@ export interface ServiceRequest {
   reason?: string;
   supervisorRemark?: string;
   details: ServiceRequestDetail[];
+  requester?: { fullName: string };
+  approvedBy?: { fullName: string };
 }
 
 export interface ServiceRequestDetail {
@@ -78,6 +88,7 @@ export interface ServiceRequestDetail {
   issuedQty: number;
   unitCost?: number;
   remarks?: string;
+  item?: { itemName: string; sku: string };
 }
 
 export interface PurchaseRequest {
@@ -91,6 +102,8 @@ export interface PurchaseRequest {
   estimatedBudget?: number;
   rejectionReason?: string;
   details: PurchaseRequestDetail[];
+  requester?: { fullName: string };
+  approvedBy?: { fullName: string };
 }
 
 export interface PurchaseRequestDetail {
@@ -101,6 +114,7 @@ export interface PurchaseRequestDetail {
   unitOfMeasure: string;
   quantity: number;
   unitCost?: number;
+  item?: { itemName: string; sku: string };
 }
 
 export interface ReceivingNote {
@@ -118,6 +132,10 @@ export interface ReceivingNote {
   tenderReferenceNumber?: string;
   notes?: string;
   details: ReceivingNoteDetail[];
+  supplier?: { supplierName: string };
+  receivedBy?: { fullName: string };
+  approvedBy?: { fullName: string };
+  inspectionLog?: InspectionLog;
 }
 
 export interface ReceivingNoteDetail {
@@ -129,6 +147,7 @@ export interface ReceivingNoteDetail {
   unitCost: number;
   tagNumber?: string;
   serialNumber?: string;
+  item?: { itemName: string; sku: string };
 }
 
 export interface InspectionLog {
@@ -151,6 +170,8 @@ export interface StoreIssueVoucher {
   recipientSignature?: string;
   status: WorkflowStatus;
   details: StoreIssueVoucherDetail[];
+  issuedBy?: { fullName: string };
+  serviceRequest?: { srNumber: string };
 }
 
 export interface StoreIssueVoucherDetail {
@@ -160,6 +181,7 @@ export interface StoreIssueVoucherDetail {
   shelfId: string;
   quantityIssued: number;
   unitCost?: number;
+  item?: { itemName: string; sku: string };
 }
 
 export interface PropertyReturn {
@@ -171,6 +193,9 @@ export interface PropertyReturn {
   status: WorkflowStatus;
   reason?: string;
   details: PropertyReturnDetail[];
+  returnedBy?: { fullName: string };
+  receivedBy?: { fullName: string };
+  authorizedBy?: { fullName: string };
 }
 
 export interface PropertyReturnDetail {
@@ -183,6 +208,7 @@ export interface PropertyReturnDetail {
   tagNumber?: string;
   serialNumber?: string;
   condition: PropertyCondition;
+  item?: { itemName: string; sku: string };
 }
 
 export interface PropertyTransfer {
@@ -194,6 +220,9 @@ export interface PropertyTransfer {
   status: WorkflowStatus;
   reason?: string;
   details: PropertyTransferDetail[];
+  fromCustodian?: { fullName: string };
+  toCustodian?: { fullName: string };
+  authorizedBy?: { fullName: string };
 }
 
 export interface PropertyTransferDetail {
@@ -203,6 +232,7 @@ export interface PropertyTransferDetail {
   quantity: number;
   tagNumber?: string;
   serialNumber?: string;
+  item?: { itemName: string; sku: string };
 }
 
 export interface PropertyHandover {
@@ -217,6 +247,9 @@ export interface PropertyHandover {
   toLocation?: string;
   remarks?: string;
   details: PropertyHandoverDetail[];
+  handoverFrom?: { fullName: string };
+  handoverTo?: { fullName: string };
+  authorizedBy?: { fullName: string };
 }
 
 export interface PropertyHandoverDetail {
@@ -229,6 +262,7 @@ export interface PropertyHandoverDetail {
   farnNumber?: string;
   rmrnNumber?: string;
   faivNumber?: string;
+  item?: { itemName: string; sku: string };
 }
 
 export interface DisposalRecord {

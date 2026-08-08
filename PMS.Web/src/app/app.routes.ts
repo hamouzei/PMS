@@ -20,6 +20,45 @@ export const routes: Routes = [
       {
         path: 'master-data',
         loadChildren: () => import('./features/master-data/master-data.routes').then(m => m.MASTER_DATA_ROUTES)
+      },
+      // ── Phase 4: Receiving & Stock Control ──────────────────────────
+      {
+        path: 'receiving',
+        loadComponent: () => import('./features/receiving/receiving-list.component').then(m => m.ReceivingListComponent)
+      },
+      {
+        path: 'stock-control',
+        loadChildren: () => import('./features/stock-control/stock-control.routes').then(m => m.STOCK_CONTROL_ROUTES)
+      },
+      // ── Phase 5: Requisitions & Issuing ─────────────────────────────
+      {
+        path: 'store-requisitions',
+        loadComponent: () => import('./features/store-requisitions/store-request-list.component').then(m => m.StoreRequestListComponent)
+      },
+      {
+        path: 'purchase-requisitions',
+        loadComponent: () => import('./features/purchase-requisitions/purchase-request-list.component').then(m => m.PurchaseRequestListComponent)
+      },
+      {
+        path: 'issuing',
+        loadComponent: () => import('./features/issuing/issuing-list.component').then(m => m.IssuingListComponent)
+      },
+      // ── Phase 6: Custody, Returns, Transfers & Handovers ────────────
+      {
+        path: 'user-custody',
+        loadChildren: () => import('./features/user-custody/user-custody.routes').then(m => m.USER_CUSTODY_ROUTES)
+      },
+      {
+        path: 'property-returns',
+        loadChildren: () => import('./features/property-returns/property-returns.routes').then(m => m.RETURN_ROUTES)
+      },
+      {
+        path: 'property-transfers',
+        loadChildren: () => import('./features/property-transfers/property-transfers.routes').then(m => m.TRANSFER_ROUTES)
+      },
+      {
+        path: 'property-handovers',
+        loadChildren: () => import('./features/property-handovers/property-handovers.routes').then(m => m.HANDOVER_ROUTES)
       }
     ]
   },
