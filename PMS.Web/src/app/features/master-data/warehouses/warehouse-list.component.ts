@@ -7,6 +7,7 @@ import { ColumnDef, DataTableComponent } from '../../../shared/components/data-t
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { WarehouseModalComponent } from './warehouse-modal.component';
 import { ShelfModalComponent } from './shelf-modal.component';
+import { IconComponent } from '../../../shared/components/icon/icon.component';
 
 @Component({
   selector: 'app-warehouse-list',
@@ -16,7 +17,8 @@ import { ShelfModalComponent } from './shelf-modal.component';
     DataTableComponent,
     ButtonComponent,
     WarehouseModalComponent,
-    ShelfModalComponent
+    ShelfModalComponent,
+    IconComponent
   ],
   template: `
     <div class="tab-content">
@@ -27,10 +29,10 @@ import { ShelfModalComponent } from './shelf-modal.component';
         </div>
         <div class="btn-group">
           <app-button variant="secondary" (btnClick)="openShelfModal()">
-            <span>🏷️ Add Shelf Location</span>
+            <span><app-icon name="tag" [size]="16"></app-icon> Add Shelf Location</span>
           </app-button>
           <app-button variant="gold" (btnClick)="openWarehouseModal()">
-            <span>🏢 Add Warehouse</span>
+            <span><app-icon name="warehouse" [size]="16"></app-icon> Add Warehouse</span>
           </app-button>
         </div>
       </div>
@@ -52,7 +54,7 @@ import { ShelfModalComponent } from './shelf-modal.component';
         <ng-template #cellTemplate let-row let-key="key">
           <ng-container [ngSwitch]="key">
             <span *ngSwitchCase="'qrCodeValue'" class="qr-code-pill">
-              📱 {{ row.qrCodeValue }}
+              <app-icon name="tag" [size]="14"></app-icon> {{ row.qrCodeValue }}
             </span>
             <span *ngSwitchCase="'warehouse'">
               {{ row.warehouse?.warehouseName || row.warehouseId || '-' }}
@@ -83,7 +85,7 @@ import { ShelfModalComponent } from './shelf-modal.component';
     .content-header { display: flex; align-items: center; justify-content: space-between; }
     .subtitle { color: var(--text-secondary); font-size: 0.875rem; margin-top: 0.25rem; }
     .btn-group { display: flex; gap: 0.75rem; }
-    .section-title { font-weight: 600; font-size: 1rem; color: var(--ecx-navy-primary); margin-top: 0.5rem; }
+    .section-title { font-weight: 600; font-size: 1rem; color: var(--brand-header-text); margin-top: 0.5rem; }
     .qr-code-pill {
       font-family: monospace; font-size: 0.75rem; font-weight: 600; padding: 0.25rem 0.5rem;
       background-color: var(--bg-surface-hover); border-radius: var(--radius-sm); border: 1px solid var(--border-color);

@@ -7,16 +7,17 @@ import { ButtonComponent } from '../../shared/components/button/button.component
 import { StatusBadgeComponent } from '../../shared/components/status-badge/status-badge.component';
 import { EthiopianDatePipe } from '../../shared/pipes/ethiopian-date.pipe';
 import { PropertyReturn, WorkflowStatus, PROPERTY_CONDITION_LABELS } from '../../core/models/workflow.model';
+import { IconComponent } from '../../shared/components/icon/icon.component';
 
 @Component({
   selector: 'app-return-detail-modal',
   standalone: true,
-  imports: [CommonModule, ButtonComponent, StatusBadgeComponent, EthiopianDatePipe],
+  imports: [CommonModule, ButtonComponent, StatusBadgeComponent, EthiopianDatePipe, IconComponent],
   template: `
     <div class="modal-backdrop" (click)="close()">
       <div class="modal-panel modal-lg" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h3>📋 Return Detail — {{ detail?.rmrnNumber }}</h3>
+          <h3><app-icon name="rotate-ccw" [size]="20"></app-icon> Return Detail — {{ detail?.rmrnNumber }}</h3>
           <button class="modal-close" (click)="close()">&times;</button>
         </div>
 
@@ -47,7 +48,7 @@ import { PropertyReturn, WorkflowStatus, PROPERTY_CONDITION_LABELS } from '../..
 
           <div class="modal-footer" *ngIf="canApprove">
             <app-button variant="gold" (btnClick)="approve()" [loading]="approving">
-              <span>✅ Approve Return & Restock</span>
+              <span><app-icon name="check-circle" [size]="16"></app-icon> Approve Return & Restock</span>
             </app-button>
           </div>
         </div>

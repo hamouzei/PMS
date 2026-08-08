@@ -8,11 +8,12 @@ import { ColumnDef, DataTableComponent } from '../../shared/components/data-tabl
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { OpeningBalanceModalComponent } from './opening-balance-modal.component';
 import { StockAdjustmentModalComponent } from './stock-adjustment-modal.component';
+import { IconComponent } from '../../shared/components/icon/icon.component';
 
 @Component({
   selector: 'app-stock-balances',
   standalone: true,
-  imports: [CommonModule, FormsModule, DataTableComponent, ButtonComponent, OpeningBalanceModalComponent, StockAdjustmentModalComponent],
+  imports: [CommonModule, FormsModule, DataTableComponent, ButtonComponent, OpeningBalanceModalComponent, StockAdjustmentModalComponent, IconComponent],
   template: `
     <div class="page-container">
       <div class="page-header">
@@ -21,8 +22,12 @@ import { StockAdjustmentModalComponent } from './stock-adjustment-modal.componen
           <p class="subtitle">Current inventory levels across warehouses</p>
         </div>
         <div class="header-actions">
-          <app-button variant="secondary" (btnClick)="showOpeningModal = true"><span>📋 Opening Balance</span></app-button>
-          <app-button variant="gold" (btnClick)="showAdjustModal = true"><span>⚖️ Stock Adjustment</span></app-button>
+          <app-button variant="secondary" (btnClick)="showOpeningModal = true">
+            <span><app-icon name="plus" [size]="16"></app-icon> Opening Balance</span>
+          </app-button>
+          <app-button variant="gold" (btnClick)="showAdjustModal = true">
+            <span><app-icon name="scale" [size]="16"></app-icon> Stock Adjustment</span>
+          </app-button>
         </div>
       </div>
 

@@ -1,13 +1,16 @@
 import { Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { IconComponent } from '../icon/icon.component';
 
 @Component({
   selector: 'app-kpi-tile',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, IconComponent],
   template: `
     <div class="kpi-tile" [class.alert]="alert()" [class.clickable]="!!routerLink()" (click)="navigate()">
-      <div class="kpi-icon">{{ icon() }}</div>
+      <div class="kpi-icon">
+        <app-icon [name]="icon()" [size]="24"></app-icon>
+      </div>
       <div class="kpi-body">
         <span class="kpi-value" [class.loading]="loading()">{{ loading() ? '—' : value() }}</span>
         <span class="kpi-label">{{ label() }}</span>
@@ -26,7 +29,8 @@ import { CommonModule } from '@angular/common';
       &.alert::before { background: linear-gradient(90deg, var(--ecx-warning), var(--ecx-danger)); }
       &.clickable { cursor: pointer; &:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); } }
     }
-    .kpi-icon { font-size: 1.5rem; }
+    .kpi-icon { color: var(--icon-accent); display: inline-flex; align-items: center; }
+    .alert .kpi-icon { color: var(--ecx-warning); }
     .kpi-body { display: flex; flex-direction: column; gap: 0.125rem; }
     .kpi-value { font-size: 2rem; font-weight: 700; color: var(--text-primary); line-height: 1; letter-spacing: -0.025em; &.loading { opacity: 0.3; } }
     .kpi-label { font-size: 0.8125rem; font-weight: 500; color: var(--text-secondary); }
@@ -34,7 +38,7 @@ import { CommonModule } from '@angular/common';
   `]
 })
 export class KpiTileComponent {
-  icon = input<string>('📊');
+  icon = input<string>('package');
   value = input<number | string>(0);
   label = input<string>('');
   subtitle = input<string>('');

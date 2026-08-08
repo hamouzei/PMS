@@ -5,16 +5,17 @@ import { ButtonComponent } from '../../shared/components/button/button.component
 import { StockApiService, StockAdjustmentPayload } from '../../core/services/stock-api.service';
 import { MasterDataApiService } from '../../core/services/master-data-api.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { IconComponent } from '../../shared/components/icon/icon.component';
 
 @Component({
   selector: 'app-stock-adjustment-modal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ButtonComponent],
+  imports: [CommonModule, ReactiveFormsModule, ButtonComponent, IconComponent],
   template: `
     <div class="modal-backdrop" (click)="close()">
       <div class="modal-panel" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h3>⚖️ Stock Adjustment</h3>
+          <h3><app-icon name="scale" [size]="20"></app-icon> Stock Adjustment</h3>
           <button class="modal-close" (click)="close()">&times;</button>
         </div>
         <form [formGroup]="form" (ngSubmit)="onSubmit()" class="modal-body">
@@ -43,7 +44,7 @@ import { NotificationService } from '../../core/services/notification.service';
           <div class="modal-footer">
             <app-button variant="secondary" type="button" (btnClick)="close()">Cancel</app-button>
             <app-button variant="gold" type="submit" [loading]="saving" [disabled]="form.invalid">
-              <span>⚖️ Apply Adjustment</span>
+              <span><app-icon name="check" [size]="16"></app-icon> Apply Adjustment</span>
             </app-button>
           </div>
         </form>

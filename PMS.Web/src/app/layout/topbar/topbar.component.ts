@@ -5,11 +5,12 @@ import { AuthStore } from '../../core/auth/auth.store';
 import { AuthService } from '../../core/auth/auth.service';
 import { EthiopianCalendarService } from '../../core/services/ethiopian-calendar.service';
 import { ThemeService } from '../../core/services/theme.service';
+import { IconComponent } from '../../shared/components/icon/icon.component';
 
 @Component({
   selector: 'app-topbar',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, IconComponent],
   template: `
     <header class="topbar">
       <div class="topbar-left">
@@ -19,7 +20,7 @@ import { ThemeService } from '../../core/services/theme.service';
 
       <div class="topbar-right">
         <button type="button" class="icon-btn" (click)="themeService.toggleTheme()" title="Toggle Theme">
-          <span>{{ currentTheme() === 'light' ? '🌙' : '☀️' }}</span>
+          <app-icon [name]="currentTheme() === 'light' ? 'moon' : 'sun'" [size]="18"></app-icon>
         </button>
 
         <div *ngIf="user()" class="user-profile">
@@ -29,7 +30,7 @@ import { ThemeService } from '../../core/services/theme.service';
             <span class="user-role">{{ roleName() }}</span>
           </div>
           <button type="button" class="logout-btn" (click)="authService.logout()" title="Sign Out">
-            <span>🚪</span>
+            <app-icon name="log-out" [size]="18"></app-icon>
           </button>
         </div>
       </div>
@@ -45,7 +46,7 @@ import { ThemeService } from '../../core/services/theme.service';
       position: sticky; top: 0; z-index: 100;
     }
     .topbar-left { display: flex; align-items: center; gap: 0.75rem; }
-    .brand-title { font-size: 1.125rem; font-weight: 700; color: var(--ecx-navy-primary); }
+    .brand-title { font-size: 1.125rem; font-weight: 700; color: var(--brand-header-text); }
     .efy-badge {
       font-size: 0.75rem; font-weight: 700; padding: 0.2rem 0.5rem;
       background-color: var(--ecx-gold-primary); color: #0F172A;

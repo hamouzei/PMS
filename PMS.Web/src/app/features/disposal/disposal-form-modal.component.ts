@@ -6,6 +6,7 @@ import { DisposalApiService, CreateDisposalPayload } from '../../core/services/d
 import { MasterDataApiService } from '../../core/services/master-data-api.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { PropertyCondition, DisposalMethod, PROPERTY_CONDITION_LABELS } from '../../core/models/workflow.model';
+import { IconComponent } from '../../shared/components/icon/icon.component';
 
 const DISPOSAL_METHOD_LABELS: Record<number, string> = {
   [DisposalMethod.Auction]: 'Auction',
@@ -17,12 +18,12 @@ const DISPOSAL_METHOD_LABELS: Record<number, string> = {
 @Component({
   selector: 'app-disposal-form-modal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ButtonComponent],
+  imports: [CommonModule, ReactiveFormsModule, ButtonComponent, IconComponent],
   template: `
     <div class="modal-backdrop" (click)="close()">
       <div class="modal-panel" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h3>🗑️ New Disposal Request</h3>
+          <h3><app-icon name="trash-2" [size]="20"></app-icon> New Disposal Request</h3>
           <button class="modal-close" (click)="close()">&times;</button>
         </div>
         <form [formGroup]="form" (ngSubmit)="onSubmit()" class="modal-body">
@@ -65,7 +66,7 @@ const DISPOSAL_METHOD_LABELS: Record<number, string> = {
           <div class="modal-footer">
             <app-button variant="secondary" type="button" (btnClick)="close()">Cancel</app-button>
             <app-button variant="gold" type="submit" [loading]="saving" [disabled]="form.invalid">
-              <span>🗑️ Submit Disposal</span>
+              <span><app-icon name="check" [size]="16"></app-icon> Submit Disposal</span>
             </app-button>
           </div>
         </form>

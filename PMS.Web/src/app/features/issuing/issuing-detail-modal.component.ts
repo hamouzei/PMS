@@ -5,16 +5,17 @@ import { NotificationService } from '../../core/services/notification.service';
 import { StatusBadgeComponent } from '../../shared/components/status-badge/status-badge.component';
 import { EthiopianDatePipe } from '../../shared/pipes/ethiopian-date.pipe';
 import { StoreIssueVoucher } from '../../core/models/workflow.model';
+import { IconComponent } from '../../shared/components/icon/icon.component';
 
 @Component({
   selector: 'app-issuing-detail-modal',
   standalone: true,
-  imports: [CommonModule, StatusBadgeComponent, EthiopianDatePipe],
+  imports: [CommonModule, StatusBadgeComponent, EthiopianDatePipe, IconComponent],
   template: `
     <div class="modal-backdrop" (click)="close()">
       <div class="modal-panel modal-lg" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h3>📋 Issue Voucher — {{ detail?.sivNumber }}</h3>
+          <h3><app-icon name="package" [size]="20"></app-icon> Issue Voucher — {{ detail?.sivNumber }}</h3>
           <button class="modal-close" (click)="close()">&times;</button>
         </div>
         <div class="modal-body" *ngIf="detail; else loadingTpl">

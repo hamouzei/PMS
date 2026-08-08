@@ -9,13 +9,15 @@ import { ButtonComponent } from '../../shared/components/button/button.component
 import { EthiopianDatePipe } from '../../shared/pipes/ethiopian-date.pipe';
 import { TransferFormModalComponent } from './transfer-form-modal.component';
 import { TransferDetailModalComponent } from './transfer-detail-modal.component';
+import { IconComponent } from '../../shared/components/icon/icon.component';
 
 @Component({
   selector: 'app-transfer-list',
   standalone: true,
   imports: [
     CommonModule, FormsModule, DataTableComponent, StatusBadgeComponent,
-    ButtonComponent, EthiopianDatePipe, TransferFormModalComponent, TransferDetailModalComponent
+    ButtonComponent, EthiopianDatePipe, TransferFormModalComponent, TransferDetailModalComponent,
+    IconComponent
   ],
   template: `
     <div class="page-container">
@@ -25,7 +27,7 @@ import { TransferDetailModalComponent } from './transfer-detail-modal.component'
           <p class="subtitle">Transfer custody of assets between staff members — requires authorization</p>
         </div>
         <app-button variant="gold" (btnClick)="showCreateModal = true">
-          <span>🔄 New Transfer</span>
+          <span><app-icon name="plus" [size]="16"></app-icon> New Transfer</span>
         </app-button>
       </div>
 
@@ -60,7 +62,9 @@ import { TransferDetailModalComponent } from './transfer-detail-modal.component'
         </ng-template>
 
         <ng-template #actionsTemplate let-row>
-          <button class="action-btn" title="View" (click)="openDetail(row)">📋</button>
+          <button class="action-btn" title="View" (click)="openDetail(row)">
+            <app-icon name="eye" [size]="16"></app-icon>
+          </button>
         </ng-template>
       </app-data-table>
 

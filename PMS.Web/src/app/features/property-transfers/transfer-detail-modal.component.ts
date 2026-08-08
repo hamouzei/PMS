@@ -7,16 +7,17 @@ import { ButtonComponent } from '../../shared/components/button/button.component
 import { StatusBadgeComponent } from '../../shared/components/status-badge/status-badge.component';
 import { EthiopianDatePipe } from '../../shared/pipes/ethiopian-date.pipe';
 import { PropertyTransfer, WorkflowStatus } from '../../core/models/workflow.model';
+import { IconComponent } from '../../shared/components/icon/icon.component';
 
 @Component({
   selector: 'app-transfer-detail-modal',
   standalone: true,
-  imports: [CommonModule, ButtonComponent, StatusBadgeComponent, EthiopianDatePipe],
+  imports: [CommonModule, ButtonComponent, StatusBadgeComponent, EthiopianDatePipe, IconComponent],
   template: `
     <div class="modal-backdrop" (click)="close()">
       <div class="modal-panel modal-lg" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h3>📋 Transfer Detail — {{ detail?.rmtnNumber }}</h3>
+          <h3><app-icon name="arrow-left-right" [size]="20"></app-icon> Transfer Detail — {{ detail?.rmtnNumber }}</h3>
           <button class="modal-close" (click)="close()">&times;</button>
         </div>
 
@@ -47,7 +48,7 @@ import { PropertyTransfer, WorkflowStatus } from '../../core/models/workflow.mod
 
           <div class="modal-footer" *ngIf="canApprove">
             <app-button variant="gold" (btnClick)="approve()" [loading]="approving">
-              <span>✅ Authorize Transfer</span>
+              <span><app-icon name="check-circle" [size]="16"></app-icon> Authorize Transfer</span>
             </app-button>
           </div>
         </div>

@@ -7,16 +7,17 @@ import { MasterDataApiService } from '../../core/services/master-data-api.servic
 import { NotificationService } from '../../core/services/notification.service';
 import { AuthStore } from '../../core/auth/auth.store';
 import { PropertyCondition } from '../../core/models/workflow.model';
+import { IconComponent } from '../../shared/components/icon/icon.component';
 
 @Component({
   selector: 'app-return-form-modal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ButtonComponent],
+  imports: [CommonModule, ReactiveFormsModule, ButtonComponent, IconComponent],
   template: `
     <div class="modal-backdrop" (click)="close()">
       <div class="modal-panel modal-lg" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h3>↩️ New Property Return (RMRN)</h3>
+          <h3><app-icon name="rotate-ccw" [size]="20"></app-icon> New Property Return (RMRN)</h3>
           <button class="modal-close" (click)="close()">&times;</button>
         </div>
 
@@ -29,7 +30,7 @@ import { PropertyCondition } from '../../core/models/workflow.model';
           <div class="section-divider">
             <h4>Return Items (from your custody)</h4>
             <app-button variant="ghost" type="button" (btnClick)="addLine()">
-              <span>➕ Add Item</span>
+              <span><app-icon name="plus" [size]="16"></app-icon> Add Item</span>
             </app-button>
           </div>
 
@@ -74,7 +75,7 @@ import { PropertyCondition } from '../../core/models/workflow.model';
           <div class="modal-footer">
             <app-button variant="secondary" type="button" (btnClick)="close()">Cancel</app-button>
             <app-button variant="gold" type="submit" [loading]="saving" [disabled]="form.invalid || detailControls.length === 0">
-              <span>↩️ Submit Return</span>
+              <span><app-icon name="check" [size]="16"></app-icon> Submit Return</span>
             </app-button>
           </div>
         </form>

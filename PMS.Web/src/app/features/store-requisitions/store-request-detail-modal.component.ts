@@ -8,16 +8,17 @@ import { ButtonComponent } from '../../shared/components/button/button.component
 import { StatusBadgeComponent } from '../../shared/components/status-badge/status-badge.component';
 import { EthiopianDatePipe } from '../../shared/pipes/ethiopian-date.pipe';
 import { ServiceRequest, WorkflowStatus } from '../../core/models/workflow.model';
+import { IconComponent } from '../../shared/components/icon/icon.component';
 
 @Component({
   selector: 'app-store-request-detail-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, ButtonComponent, StatusBadgeComponent, EthiopianDatePipe],
+  imports: [CommonModule, FormsModule, ButtonComponent, StatusBadgeComponent, EthiopianDatePipe, IconComponent],
   template: `
     <div class="modal-backdrop" (click)="close()">
       <div class="modal-panel modal-lg" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h3>📋 Store Request — {{ detail?.srNumber }}</h3>
+          <h3><app-icon name="file-text" [size]="20"></app-icon> Store Request — {{ detail?.srNumber }}</h3>
           <button class="modal-close" (click)="close()">&times;</button>
         </div>
         <div class="modal-body" *ngIf="detail; else loadingTpl">
@@ -51,8 +52,12 @@ import { ServiceRequest, WorkflowStatus } from '../../core/models/workflow.model
               <input [(ngModel)]="remark" class="form-control" placeholder="Optional remark" />
             </div>
             <div class="action-row">
-              <app-button variant="gold" (btnClick)="approve()" [loading]="approving"><span>✅ Approve</span></app-button>
-              <app-button variant="danger" (btnClick)="showRejectForm = true" *ngIf="!showRejectForm"><span>❌ Reject</span></app-button>
+              <app-button variant="gold" (btnClick)="approve()" [loading]="approving">
+                <span><app-icon name="check-circle" [size]="16"></app-icon> Approve</span>
+              </app-button>
+              <app-button variant="danger" (btnClick)="showRejectForm = true" *ngIf="!showRejectForm">
+                <span><app-icon name="x-circle" [size]="16"></app-icon> Reject</span>
+              </app-button>
             </div>
             <div *ngIf="showRejectForm" class="reject-form">
               <div class="form-group">
@@ -60,7 +65,7 @@ import { ServiceRequest, WorkflowStatus } from '../../core/models/workflow.model
                 <textarea [(ngModel)]="rejectReason" class="form-control" rows="2"></textarea>
               </div>
               <app-button variant="danger" (btnClick)="reject()" [loading]="rejecting" [disabled]="!rejectReason">
-                <span>❌ Confirm Rejection</span>
+                <span><app-icon name="x-circle" [size]="16"></app-icon> Confirm Rejection</span>
               </app-button>
             </div>
           </div>

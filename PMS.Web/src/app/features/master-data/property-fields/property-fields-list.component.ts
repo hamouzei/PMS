@@ -6,11 +6,12 @@ import { FieldDataType, PropertyField, PropertyType } from '../../../core/models
 import { ColumnDef, DataTableComponent } from '../../../shared/components/data-table/data-table.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { PropertyFieldModalComponent } from './property-field-modal.component';
+import { IconComponent } from '../../../shared/components/icon/icon.component';
 
 @Component({
   selector: 'app-property-fields-list',
   standalone: true,
-  imports: [CommonModule, DataTableComponent, ButtonComponent, PropertyFieldModalComponent],
+  imports: [CommonModule, DataTableComponent, ButtonComponent, PropertyFieldModalComponent, IconComponent],
   template: `
     <div class="tab-content">
       <div class="content-header">
@@ -19,7 +20,7 @@ import { PropertyFieldModalComponent } from './property-field-modal.component';
           <p class="subtitle">Define custom specifications, serial numbers, and attributes per property type</p>
         </div>
         <app-button variant="gold" (btnClick)="openModal()">
-          <span>➕ Add Schema Field</span>
+          <span><app-icon name="plus" [size]="16"></app-icon> Add Schema Field</span>
         </app-button>
       </div>
 

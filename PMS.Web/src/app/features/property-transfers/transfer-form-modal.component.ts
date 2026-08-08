@@ -6,16 +6,17 @@ import { CustodyApiService, CustodyRecord, CreateTransferPayload, TransferLinePa
 import { NotificationService } from '../../core/services/notification.service';
 import { AuthStore } from '../../core/auth/auth.store';
 import { AdminApiService } from '../../core/services/admin-api.service';
+import { IconComponent } from '../../shared/components/icon/icon.component';
 
 @Component({
   selector: 'app-transfer-form-modal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ButtonComponent],
+  imports: [CommonModule, ReactiveFormsModule, ButtonComponent, IconComponent],
   template: `
     <div class="modal-backdrop" (click)="close()">
       <div class="modal-panel modal-lg" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h3>🔄 New Property Transfer (RMTN)</h3>
+          <h3><app-icon name="arrow-left-right" [size]="20"></app-icon> New Property Transfer (RMTN)</h3>
           <button class="modal-close" (click)="close()">&times;</button>
         </div>
 
@@ -37,7 +38,7 @@ import { AdminApiService } from '../../core/services/admin-api.service';
           <div class="section-divider">
             <h4>Items to Transfer (from your custody)</h4>
             <app-button variant="ghost" type="button" (btnClick)="addLine()">
-              <span>➕ Add Item</span>
+              <span><app-icon name="plus" [size]="16"></app-icon> Add Item</span>
             </app-button>
           </div>
 
@@ -69,7 +70,7 @@ import { AdminApiService } from '../../core/services/admin-api.service';
           <div class="modal-footer">
             <app-button variant="secondary" type="button" (btnClick)="close()">Cancel</app-button>
             <app-button variant="gold" type="submit" [loading]="saving" [disabled]="form.invalid || detailControls.length === 0">
-              <span>🔄 Submit Transfer</span>
+              <span><app-icon name="check" [size]="16"></app-icon> Submit Transfer</span>
             </app-button>
           </div>
         </form>

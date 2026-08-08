@@ -7,16 +7,17 @@ import { ButtonComponent } from '../../shared/components/button/button.component
 import { StatusBadgeComponent } from '../../shared/components/status-badge/status-badge.component';
 import { EthiopianDatePipe } from '../../shared/pipes/ethiopian-date.pipe';
 import { ComplianceRecord, WorkflowStatus } from '../../core/models/workflow.model';
+import { IconComponent } from '../../shared/components/icon/icon.component';
 
 @Component({
   selector: 'app-compliance-detail-modal',
   standalone: true,
-  imports: [CommonModule, ButtonComponent, StatusBadgeComponent, EthiopianDatePipe],
+  imports: [CommonModule, ButtonComponent, StatusBadgeComponent, EthiopianDatePipe, IconComponent],
   template: `
     <div class="modal-backdrop" (click)="close()">
       <div class="modal-panel" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h3>📋 Compliance — {{ detail?.complianceNumber }}</h3>
+          <h3><app-icon name="shield-check" [size]="20"></app-icon> Compliance — {{ detail?.complianceNumber }}</h3>
           <button class="modal-close" (click)="close()">&times;</button>
         </div>
         <div class="modal-body" *ngIf="detail; else loadingTpl">
@@ -29,17 +30,17 @@ import { ComplianceRecord, WorkflowStatus } from '../../core/models/workflow.mod
           </div>
 
           <div class="content-section" *ngIf="detail.findings">
-            <h4 class="section-title">🔍 Findings</h4>
+            <h4 class="section-title"><app-icon name="search" [size]="16"></app-icon> Findings</h4>
             <p class="content-text">{{ detail.findings }}</p>
           </div>
 
           <div class="content-section" *ngIf="detail.recommendations">
-            <h4 class="section-title">💡 Recommendations</h4>
+            <h4 class="section-title"><app-icon name="clipboard-list" [size]="16"></app-icon> Recommendations</h4>
             <p class="content-text">{{ detail.recommendations }}</p>
           </div>
 
           <div class="content-section" *ngIf="detail.correctiveActions">
-            <h4 class="section-title">🛠️ Corrective Actions</h4>
+            <h4 class="section-title"><app-icon name="settings" [size]="16"></app-icon> Corrective Actions</h4>
             <p class="content-text">{{ detail.correctiveActions }}</p>
           </div>
 
@@ -47,7 +48,7 @@ import { ComplianceRecord, WorkflowStatus } from '../../core/models/workflow.mod
             <h4 class="section-title">Close Record</h4>
             <p class="action-hint">Closing marks all corrective actions as resolved.</p>
             <app-button variant="gold" (btnClick)="closeRecord()" [loading]="closing">
-              <span>✅ Close Compliance Record</span>
+              <span><app-icon name="check-circle" [size]="16"></app-icon> Close Compliance Record</span>
             </app-button>
           </div>
         </div>

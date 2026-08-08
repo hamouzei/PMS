@@ -5,11 +5,12 @@ import { NotificationService } from '../../core/services/notification.service';
 import { AuthStore } from '../../core/auth/auth.store';
 import { ColumnDef, DataTableComponent } from '../../shared/components/data-table/data-table.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
+import { IconComponent } from '../../shared/components/icon/icon.component';
 
 @Component({
   selector: 'app-user-custody-list',
   standalone: true,
-  imports: [CommonModule, DataTableComponent, ButtonComponent],
+  imports: [CommonModule, DataTableComponent, ButtonComponent, IconComponent],
   template: `
     <div class="page-container">
       <div class="page-header">
@@ -21,13 +22,13 @@ import { ButtonComponent } from '../../shared/components/button/button.component
           <app-button
             [variant]="showAllCustody ? 'secondary' : 'gold'"
             (btnClick)="showAllCustody = false; loadData()">
-            <span>👤 My Custody</span>
+            <span><app-icon name="user" [size]="16"></app-icon> My Custody</span>
           </app-button>
           <app-button
             *ngIf="authStore.hasRole(['PropertyAdmin', 'Storekeeper'])"
             [variant]="showAllCustody ? 'gold' : 'secondary'"
             (btnClick)="showAllCustody = true; loadData()">
-            <span>📋 All Custody Records</span>
+            <span><app-icon name="clipboard-list" [size]="16"></app-icon> All Custody Records</span>
           </app-button>
         </div>
       </div>
@@ -74,12 +75,12 @@ import { ButtonComponent } from '../../shared/components/button/button.component
       border-radius: var(--radius-md); display: flex; flex-direction: column; gap: 0.25rem;
       min-width: 140px;
     }
-    .card-number { font-size: 1.5rem; font-weight: 700; color: var(--ecx-navy-primary); }
+    .card-number { font-size: 1.5rem; font-weight: 700; color: var(--text-primary); }
     .card-label { font-size: 0.75rem; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
     .tag-badge {
       font-family: 'Courier New', monospace; font-size: 0.8125rem; font-weight: 600;
       padding: 0.125rem 0.5rem; background: var(--bg-app); border-radius: var(--radius-sm);
-      color: var(--ecx-navy-primary); border: 1px solid var(--border-color);
+      color: var(--icon-accent); border: 1px solid var(--border-color);
     }
   `]
 })

@@ -7,11 +7,12 @@ import { AuthService } from '../../core/auth/auth.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { InputComponent } from '../../shared/components/input/input.component';
+import { IconComponent } from '../../shared/components/icon/icon.component';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ButtonComponent, InputComponent],
+  imports: [CommonModule, ReactiveFormsModule, ButtonComponent, InputComponent, IconComponent],
   template: `
     <div class="login-container">
       <div class="login-card">
@@ -22,7 +23,7 @@ import { InputComponent } from '../../shared/components/input/input.component';
         </div>
 
         <div *ngIf="lockoutMessage" class="lockout-alert">
-          <span class="alert-icon">🔒</span>
+          <span class="alert-icon"><app-icon name="lock" [size]="20"></app-icon></span>
           <div class="alert-content">
             <strong>Account Locked</strong>
             <span>{{ lockoutMessage }}</span>

@@ -6,18 +6,19 @@ import { AuthStore } from '../../core/auth/auth.store';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { StatusBadgeComponent } from '../../shared/components/status-badge/status-badge.component';
 import { DisposalRecord, WorkflowStatus, PROPERTY_CONDITION_LABELS } from '../../core/models/workflow.model';
+import { IconComponent } from '../../shared/components/icon/icon.component';
 
 const DISPOSAL_METHOD_LABELS: Record<number, string> = { 1: 'Auction', 2: 'Tendering', 3: 'Scrapping', 4: 'Other' };
 
 @Component({
   selector: 'app-disposal-detail-modal',
   standalone: true,
-  imports: [CommonModule, ButtonComponent, StatusBadgeComponent],
+  imports: [CommonModule, ButtonComponent, StatusBadgeComponent, IconComponent],
   template: `
     <div class="modal-backdrop" (click)="close()">
       <div class="modal-panel" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h3>📋 Disposal — {{ detail?.disposalNumber }}</h3>
+          <h3><app-icon name="trash-2" [size]="20"></app-icon> Disposal — {{ detail?.disposalNumber }}</h3>
           <button class="modal-close" (click)="close()">&times;</button>
         </div>
         <div class="modal-body" *ngIf="detail; else loadingTpl">
@@ -38,7 +39,7 @@ const DISPOSAL_METHOD_LABELS: Record<number, string> = { 1: 'Auction', 2: 'Tende
           <div *ngIf="canApprove" class="action-section">
             <h4 class="section-title">Approval</h4>
             <app-button variant="gold" (btnClick)="approve()" [loading]="approving">
-              <span>✅ Approve Disposal</span>
+              <span><app-icon name="check-circle" [size]="16"></app-icon> Approve Disposal</span>
             </app-button>
           </div>
         </div>

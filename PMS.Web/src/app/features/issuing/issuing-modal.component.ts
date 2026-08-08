@@ -6,16 +6,17 @@ import { IssuingApiService, IssueStockPayload } from '../../core/services/issuin
 import { RequisitionApiService, StoreRequestSummary } from '../../core/services/requisition-api.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { AuthStore } from '../../core/auth/auth.store';
+import { IconComponent } from '../../shared/components/icon/icon.component';
 
 @Component({
   selector: 'app-issuing-modal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ButtonComponent],
+  imports: [CommonModule, ReactiveFormsModule, ButtonComponent, IconComponent],
   template: `
     <div class="modal-backdrop" (click)="close()">
       <div class="modal-panel" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h3>📦 Issue Stock</h3>
+          <h3><app-icon name="package" [size]="20"></app-icon> Issue Stock</h3>
           <button class="modal-close" (click)="close()">&times;</button>
         </div>
         <form [formGroup]="form" (ngSubmit)="onSubmit()" class="modal-body">
@@ -34,7 +35,7 @@ import { AuthStore } from '../../core/auth/auth.store';
           <div class="modal-footer">
             <app-button variant="secondary" type="button" (btnClick)="close()">Cancel</app-button>
             <app-button variant="gold" type="submit" [loading]="saving" [disabled]="form.invalid">
-              <span>📦 Issue Stock</span>
+              <span><app-icon name="check" [size]="16"></app-icon> Issue Stock</span>
             </app-button>
           </div>
         </form>

@@ -8,6 +8,7 @@ import { ButtonComponent } from '../../../shared/components/button/button.compon
 import { PropertyTypePipe } from '../../../shared/pipes/property-type.pipe';
 import { CurrencyFormatterPipe } from '../../../shared/pipes/currency-formatter.pipe';
 import { ItemModalComponent } from './item-modal.component';
+import { IconComponent } from '../../../shared/components/icon/icon.component';
 
 @Component({
   selector: 'app-item-list',
@@ -18,7 +19,8 @@ import { ItemModalComponent } from './item-modal.component';
     ButtonComponent,
     PropertyTypePipe,
     CurrencyFormatterPipe,
-    ItemModalComponent
+    ItemModalComponent,
+    IconComponent
   ],
   template: `
     <div class="tab-content">
@@ -28,7 +30,7 @@ import { ItemModalComponent } from './item-modal.component';
           <p class="subtitle">Central repository of fixed assets and consumable inventory definitions</p>
         </div>
         <app-button variant="gold" (btnClick)="openCreateModal()">
-          <span>➕ Add New Item</span>
+          <span><app-icon name="plus" [size]="16"></app-icon> Add New Item</span>
         </app-button>
       </div>
 
@@ -67,7 +69,9 @@ import { ItemModalComponent } from './item-modal.component';
         </ng-template>
 
         <ng-template #actionsTemplate let-row>
-          <button type="button" class="btn-icon" (click)="openEditModal(row)">✏️ Edit</button>
+          <button type="button" class="btn-icon" (click)="openEditModal(row)">
+            <app-icon name="edit" [size]="14"></app-icon> Edit
+          </button>
         </ng-template>
       </app-data-table>
 

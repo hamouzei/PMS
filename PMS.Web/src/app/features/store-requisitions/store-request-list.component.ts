@@ -9,13 +9,15 @@ import { ButtonComponent } from '../../shared/components/button/button.component
 import { EthiopianDatePipe } from '../../shared/pipes/ethiopian-date.pipe';
 import { StoreRequestFormModalComponent } from './store-request-form-modal.component';
 import { StoreRequestDetailModalComponent } from './store-request-detail-modal.component';
+import { IconComponent } from '../../shared/components/icon/icon.component';
 
 @Component({
   selector: 'app-store-request-list',
   standalone: true,
   imports: [
     CommonModule, FormsModule, DataTableComponent, StatusBadgeComponent,
-    ButtonComponent, EthiopianDatePipe, StoreRequestFormModalComponent, StoreRequestDetailModalComponent
+    ButtonComponent, EthiopianDatePipe, StoreRequestFormModalComponent, StoreRequestDetailModalComponent,
+    IconComponent
   ],
   template: `
     <div class="page-container">
@@ -25,7 +27,7 @@ import { StoreRequestDetailModalComponent } from './store-request-detail-modal.c
           <p class="subtitle">Request items from existing store stock</p>
         </div>
         <app-button variant="gold" (btnClick)="showCreateModal = true">
-          <span>📝 New Store Request</span>
+          <span><app-icon name="plus" [size]="16"></app-icon> New Store Request</span>
         </app-button>
       </div>
 
@@ -51,7 +53,9 @@ import { StoreRequestDetailModalComponent } from './store-request-detail-modal.c
           </ng-container>
         </ng-template>
         <ng-template #actionsTemplate let-row>
-          <button class="action-btn" title="View" (click)="openDetail(row)">📋</button>
+          <button class="action-btn" title="View" (click)="openDetail(row)">
+            <app-icon name="eye" [size]="16"></app-icon>
+          </button>
         </ng-template>
       </app-data-table>
 

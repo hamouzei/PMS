@@ -7,6 +7,7 @@ import { PropertyFieldsListComponent } from './property-fields/property-fields-l
 import { WarehouseListComponent } from './warehouses/warehouse-list.component';
 import { SafetyBoxListComponent } from './safety-boxes/safety-box-list.component';
 import { SupplierListComponent } from './suppliers/supplier-list.component';
+import { IconComponent } from '../../shared/components/icon/icon.component';
 
 export type MasterDataTab = 'items' | 'categories' | 'fields' | 'warehouses' | 'safety-boxes' | 'suppliers';
 
@@ -24,7 +25,8 @@ const VALID_TABS: ReadonlySet<string> = new Set<MasterDataTab>([
     PropertyFieldsListComponent,
     WarehouseListComponent,
     SafetyBoxListComponent,
-    SupplierListComponent
+    SupplierListComponent,
+    IconComponent
   ],
   template: `
     <div class="page-container">
@@ -37,22 +39,22 @@ const VALID_TABS: ReadonlySet<string> = new Set<MasterDataTab>([
 
       <nav class="tab-navigation">
         <button type="button" [class.active]="activeTab === 'items'" (click)="switchTab('items')">
-          📦 Item Catalog
+          <app-icon name="package" [size]="16"></app-icon> Item Catalog
         </button>
         <button type="button" [class.active]="activeTab === 'categories'" (click)="switchTab('categories')">
-          📁 Categories
+          <app-icon name="layers" [size]="16"></app-icon> Categories
         </button>
         <button type="button" [class.active]="activeTab === 'fields'" (click)="switchTab('fields')">
-          ⚙️ Property Fields Schema
+          <app-icon name="settings" [size]="16"></app-icon> Property Fields Schema
         </button>
         <button type="button" [class.active]="activeTab === 'warehouses'" (click)="switchTab('warehouses')">
-          🏢 Warehouses & Shelves
+          <app-icon name="warehouse" [size]="16"></app-icon> Warehouses & Shelves
         </button>
         <button type="button" [class.active]="activeTab === 'safety-boxes'" (click)="switchTab('safety-boxes')">
-          🔒 Safety Boxes
+          <app-icon name="lock" [size]="16"></app-icon> Safety Boxes
         </button>
         <button type="button" [class.active]="activeTab === 'suppliers'" (click)="switchTab('suppliers')">
-          🏢 Approved Suppliers
+          <app-icon name="truck" [size]="16"></app-icon> Approved Suppliers
         </button>
       </nav>
 
@@ -79,7 +81,7 @@ const VALID_TABS: ReadonlySet<string> = new Set<MasterDataTab>([
         border: 1px solid transparent; cursor: pointer; transition: all var(--transition-fast);
         &:hover { color: var(--text-primary); background-color: var(--bg-surface-hover); }
         &.active {
-          color: var(--ecx-navy-primary); font-weight: 600;
+          color: var(--brand-header-text); font-weight: 600;
           background-color: var(--bg-surface); border-color: var(--border-color) var(--border-color) transparent;
         }
       }

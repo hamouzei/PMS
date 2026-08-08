@@ -6,6 +6,7 @@ import { SafetyBox, Warehouse } from '../../../core/models/master-data.model';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { SafetyBoxVisualizerComponent } from '../../../shared/components/safety-box-visualizer/safety-box-visualizer.component';
 import { SafetyBoxModalComponent, CreateSafetyBoxRequest } from './safety-box-modal.component';
+import { IconComponent } from '../../../shared/components/icon/icon.component';
 
 @Component({
   selector: 'app-safety-box-list',
@@ -14,7 +15,8 @@ import { SafetyBoxModalComponent, CreateSafetyBoxRequest } from './safety-box-mo
     CommonModule,
     ButtonComponent,
     SafetyBoxVisualizerComponent,
-    SafetyBoxModalComponent
+    SafetyBoxModalComponent,
+    IconComponent
   ],
   template: `
     <div class="tab-content">
@@ -24,7 +26,7 @@ import { SafetyBoxModalComponent, CreateSafetyBoxRequest } from './safety-box-mo
           <p class="subtitle">Visual capacity indicators for high-value asset safety boxes and shelves</p>
         </div>
         <app-button variant="gold" (btnClick)="openModal()">
-          <span>🔒 Add Safety Box</span>
+          <span><app-icon name="lock" [size]="16"></app-icon> Add Safety Box</span>
         </app-button>
       </div>
 

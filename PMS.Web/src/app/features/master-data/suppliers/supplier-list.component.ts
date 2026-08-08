@@ -7,11 +7,12 @@ import { Supplier } from '../../../core/models/master-data.model';
 import { ColumnDef, DataTableComponent } from '../../../shared/components/data-table/data-table.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { InputComponent } from '../../../shared/components/input/input.component';
+import { IconComponent } from '../../../shared/components/icon/icon.component';
 
 @Component({
   selector: 'app-supplier-list',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, DataTableComponent, ButtonComponent, InputComponent],
+  imports: [CommonModule, ReactiveFormsModule, DataTableComponent, ButtonComponent, InputComponent, IconComponent],
   template: `
     <div class="tab-content">
       <div class="content-header">
@@ -20,7 +21,7 @@ import { InputComponent } from '../../../shared/components/input/input.component
           <p class="subtitle">Vendor directory for Goods Receiving Notes (GRN) and procurement matching</p>
         </div>
         <app-button variant="gold" (btnClick)="openModal()">
-          <span>🏢 Add Supplier</span>
+          <span><app-icon name="truck" [size]="16"></app-icon> Add Supplier</span>
         </app-button>
       </div>
 

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthStore } from '../../core/auth/auth.store';
 import { HasRoleDirective } from '../../shared/directives/has-role.directive';
+import { IconComponent } from '../../shared/components/icon/icon.component';
 
 export interface MenuItem {
   title: string;
@@ -14,7 +15,7 @@ export interface MenuItem {
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive],
+  imports: [CommonModule, RouterLink, RouterLinkActive, IconComponent],
   template: `
     <aside class="sidebar">
       <nav class="sidebar-nav">
@@ -25,7 +26,9 @@ export interface MenuItem {
             [routerLink]="item.path"
             routerLinkActive="active"
             class="nav-item">
-            <span class="nav-icon">{{ item.icon }}</span>
+            <span class="nav-icon">
+              <app-icon [name]="item.icon" [size]="18"></app-icon>
+            </span>
             <span class="nav-title">{{ item.title }}</span>
           </a>
         </ng-container>
@@ -73,30 +76,30 @@ export interface MenuItem {
         font-weight: 600;
       }
     }
-    .nav-icon { font-size: 1.125rem; }
+    .nav-icon { display: inline-flex; align-items: center; }
   `]
 })
 export class SidebarComponent {
   public readonly authStore = inject(AuthStore);
 
   public readonly menuItems: MenuItem[] = [
-    { title: 'Dashboard', path: '/dashboard', icon: '📊' },
-    { title: 'Store Requisitions', path: '/store-requisitions', icon: '📝' },
-    { title: 'Purchase Requisitions', path: '/purchase-requisitions', icon: '🛒' },
-    { title: 'Receiving Management', path: '/receiving', icon: '📦', roles: ['Storekeeper', 'PropertyAdmin'] },
-    { title: 'Quality Inspection', path: '/inspection', icon: '🔍', roles: ['Inspector', 'PropertyAdmin'] },
-    { title: 'Property Issuing', path: '/issuing', icon: '🎟️', roles: ['Storekeeper', 'PropertyAdmin'] },
-    { title: 'My User Custody (UC)', path: '/user-custody', icon: '👤' },
-    { title: 'Property Returns', path: '/property-returns', icon: '↩️' },
-    { title: 'Property Transfers', path: '/property-transfers', icon: '🔄' },
-    { title: 'Property Handovers', path: '/property-handovers', icon: '🤝', roles: ['PropertyAdmin', 'DepartmentManager', 'Storekeeper'] },
-    { title: 'Disposal Stock', path: '/disposals', icon: '🗑️', roles: ['ComplianceOfficer', 'PropertyAdmin'] },
-    { title: 'Annual Inventory', path: '/annual-inventory', icon: '📋', roles: ['PropertyAdmin', 'Storekeeper', 'DepartmentManager'] },
-    { title: 'Compliance Audit', path: '/compliance', icon: '🛡️', roles: ['ComplianceOfficer', 'PropertyAdmin'] },
-    { title: 'Stock Control & Ledger', path: '/stock-control/bin-card', icon: '📊', roles: ['Storekeeper', 'PropertyAdmin'] },
-    { title: 'Safety Boxes', path: '/safety-boxes', icon: '🔒', roles: ['PropertyAdmin', 'Storekeeper'] },
-    { title: 'Master Data & Config', path: '/master-data/items', icon: '⚙️', roles: ['PropertyAdmin', 'Storekeeper'] },
-    { title: 'MIS Reports', path: '/reports/stock-summary', icon: '📈', roles: ['PropertyAdmin', 'DepartmentManager', 'ComplianceOfficer', 'ReportViewer', 'FinanceOfficer'] },
-    { title: 'User Administration', path: '/admin/users', icon: '👥', roles: ['PropertyAdmin'] }
+    { title: 'Dashboard', path: '/dashboard', icon: 'dashboard' },
+    { title: 'Store Requisitions', path: '/store-requisitions', icon: 'file-text' },
+    { title: 'Purchase Requisitions', path: '/purchase-requisitions', icon: 'shopping-cart' },
+    { title: 'Receiving Management', path: '/receiving', icon: 'package', roles: ['Storekeeper', 'PropertyAdmin'] },
+    { title: 'Quality Inspection', path: '/inspection', icon: 'search', roles: ['Inspector', 'PropertyAdmin'] },
+    { title: 'Property Issuing', path: '/issuing', icon: 'ticket', roles: ['Storekeeper', 'PropertyAdmin'] },
+    { title: 'My User Custody (UC)', path: '/user-custody', icon: 'user' },
+    { title: 'Property Returns', path: '/property-returns', icon: 'rotate-ccw' },
+    { title: 'Property Transfers', path: '/property-transfers', icon: 'arrow-left-right' },
+    { title: 'Property Handovers', path: '/property-handovers', icon: 'handshake', roles: ['PropertyAdmin', 'DepartmentManager', 'Storekeeper'] },
+    { title: 'Disposal Stock', path: '/disposals', icon: 'trash-2', roles: ['ComplianceOfficer', 'PropertyAdmin'] },
+    { title: 'Annual Inventory', path: '/annual-inventory', icon: 'clipboard-list', roles: ['PropertyAdmin', 'Storekeeper', 'DepartmentManager'] },
+    { title: 'Compliance Audit', path: '/compliance', icon: 'shield-check', roles: ['ComplianceOfficer', 'PropertyAdmin'] },
+    { title: 'Stock Control & Ledger', path: '/stock-control/bin-card', icon: 'dashboard', roles: ['Storekeeper', 'PropertyAdmin'] },
+    { title: 'Safety Boxes', path: '/safety-boxes', icon: 'lock', roles: ['PropertyAdmin', 'Storekeeper'] },
+    { title: 'Master Data & Config', path: '/master-data/items', icon: 'settings', roles: ['PropertyAdmin', 'Storekeeper'] },
+    { title: 'MIS Reports', path: '/reports/stock-summary', icon: 'bar-chart-3', roles: ['PropertyAdmin', 'DepartmentManager', 'ComplianceOfficer', 'ReportViewer', 'FinanceOfficer'] },
+    { title: 'User Administration', path: '/admin/users', icon: 'users', roles: ['PropertyAdmin'] }
   ];
 }

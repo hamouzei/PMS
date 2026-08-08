@@ -5,16 +5,17 @@ import { ButtonComponent } from '../../shared/components/button/button.component
 import { StockApiService, OpeningBalancePayload } from '../../core/services/stock-api.service';
 import { MasterDataApiService } from '../../core/services/master-data-api.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { IconComponent } from '../../shared/components/icon/icon.component';
 
 @Component({
   selector: 'app-opening-balance-modal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ButtonComponent],
+  imports: [CommonModule, ReactiveFormsModule, ButtonComponent, IconComponent],
   template: `
     <div class="modal-backdrop" (click)="close()">
       <div class="modal-panel" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h3>📋 Register Opening Balance</h3>
+          <h3><app-icon name="plus" [size]="20"></app-icon> Register Opening Balance</h3>
           <button class="modal-close" (click)="close()">&times;</button>
         </div>
         <form [formGroup]="form" (ngSubmit)="onSubmit()" class="modal-body">
@@ -49,7 +50,7 @@ import { NotificationService } from '../../core/services/notification.service';
           <div class="modal-footer">
             <app-button variant="secondary" type="button" (btnClick)="close()">Cancel</app-button>
             <app-button variant="gold" type="submit" [loading]="saving" [disabled]="form.invalid">
-              <span>📋 Register Balance</span>
+              <span><app-icon name="check" [size]="16"></app-icon> Register Balance</span>
             </app-button>
           </div>
         </form>

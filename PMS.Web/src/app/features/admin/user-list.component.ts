@@ -7,6 +7,7 @@ import { ColumnDef, DataTableComponent } from '../../shared/components/data-tabl
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { UserFormModalComponent } from './user-form-modal.component';
 import { ResetPasswordModalComponent } from './reset-password-modal.component';
+import { IconComponent } from '../../shared/components/icon/icon.component';
 
 @Component({
   selector: 'app-user-list',
@@ -16,7 +17,8 @@ import { ResetPasswordModalComponent } from './reset-password-modal.component';
     DataTableComponent,
     ButtonComponent,
     UserFormModalComponent,
-    ResetPasswordModalComponent
+    ResetPasswordModalComponent,
+    IconComponent
   ],
   template: `
     <div class="page-container">
@@ -26,7 +28,7 @@ import { ResetPasswordModalComponent } from './reset-password-modal.component';
           <p class="subtitle">Manage user accounts, assigned system roles, and credentials</p>
         </div>
         <app-button variant="gold" (btnClick)="openCreateModal()">
-          <span>➕ Create New User</span>
+          <span><app-icon name="plus" [size]="16"></app-icon> Create New User</span>
         </app-button>
       </div>
 
@@ -61,10 +63,14 @@ import { ResetPasswordModalComponent } from './reset-password-modal.component';
 
         <ng-template #actionsTemplate let-row>
           <div class="action-buttons">
-            <button type="button" class="btn-icon" (click)="openEditModal(row)" title="Edit User Profile">✏️ Edit</button>
-            <button type="button" class="btn-icon danger" (click)="openResetModal(row)" title="Reset Password">🔑 Password</button>
+            <button type="button" class="btn-icon" (click)="openEditModal(row)" title="Edit User Profile">
+              <app-icon name="edit" [size]="14"></app-icon> Edit
+            </button>
+            <button type="button" class="btn-icon danger" (click)="openResetModal(row)" title="Reset Password">
+              <app-icon name="lock" [size]="14"></app-icon> Password
+            </button>
             <button type="button" class="btn-icon toggle" (click)="toggleActiveState(row)" title="Toggle Status">
-              {{ row.isActive ? '🚫 Deactivate' : '✅ Activate' }}
+              <app-icon [name]="row.isActive ? 'x-circle' : 'check-circle'" [size]="14"></app-icon> {{ row.isActive ? 'Deactivate' : 'Activate' }}
             </button>
           </div>
         </ng-template>

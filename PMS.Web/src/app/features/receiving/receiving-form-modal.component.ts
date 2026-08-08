@@ -6,16 +6,17 @@ import { ReceivingApiService, CreateReceivingPayload, ReceivingLinePayload } fro
 import { MasterDataApiService } from '../../core/services/master-data-api.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { AuthStore } from '../../core/auth/auth.store';
+import { IconComponent } from '../../shared/components/icon/icon.component';
 
 @Component({
   selector: 'app-receiving-form-modal',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ButtonComponent],
+  imports: [CommonModule, ReactiveFormsModule, ButtonComponent, IconComponent],
   template: `
     <div class="modal-backdrop" (click)="close()">
       <div class="modal-panel modal-lg" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h3>📦 New Receiving Note</h3>
+          <h3><app-icon name="inbox" [size]="20"></app-icon> New Receiving Note</h3>
           <button class="modal-close" (click)="close()">&times;</button>
         </div>
         <form [formGroup]="form" (ngSubmit)="onSubmit()" class="modal-body">
@@ -58,7 +59,9 @@ import { AuthStore } from '../../core/auth/auth.store';
 
           <div class="section-divider">
             <h4>Received Items</h4>
-            <app-button variant="ghost" type="button" (btnClick)="addLine()"><span>➕ Add Item</span></app-button>
+            <app-button variant="ghost" type="button" (btnClick)="addLine()">
+              <span><app-icon name="plus" [size]="16"></app-icon> Add Item</span>
+            </app-button>
           </div>
 
           <div formArrayName="details" class="lines-container">
@@ -102,7 +105,7 @@ import { AuthStore } from '../../core/auth/auth.store';
           <div class="modal-footer">
             <app-button variant="secondary" type="button" (btnClick)="close()">Cancel</app-button>
             <app-button variant="gold" type="submit" [loading]="saving" [disabled]="form.invalid || detailControls.length === 0">
-              <span>📦 Create Receiving Note</span>
+              <span><app-icon name="check" [size]="16"></app-icon> Create Receiving Note</span>
             </app-button>
           </div>
         </form>

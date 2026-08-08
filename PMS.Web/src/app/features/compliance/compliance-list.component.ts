@@ -8,13 +8,15 @@ import { ButtonComponent } from '../../shared/components/button/button.component
 import { EthiopianDatePipe } from '../../shared/pipes/ethiopian-date.pipe';
 import { ComplianceFormModalComponent } from './compliance-form-modal.component';
 import { ComplianceDetailModalComponent } from './compliance-detail-modal.component';
+import { IconComponent } from '../../shared/components/icon/icon.component';
 
 @Component({
   selector: 'app-compliance-list',
   standalone: true,
   imports: [
     CommonModule, DataTableComponent, StatusBadgeComponent,
-    ButtonComponent, EthiopianDatePipe, ComplianceFormModalComponent, ComplianceDetailModalComponent
+    ButtonComponent, EthiopianDatePipe, ComplianceFormModalComponent, ComplianceDetailModalComponent,
+    IconComponent
   ],
   template: `
     <div class="page-container">
@@ -24,7 +26,7 @@ import { ComplianceDetailModalComponent } from './compliance-detail-modal.compon
           <p class="subtitle">Record findings, recommendations, and corrective actions linked to annual inventories</p>
         </div>
         <app-button variant="gold" (btnClick)="showCreateModal = true">
-          <span>📝 New Compliance Record</span>
+          <span><app-icon name="plus" [size]="16"></app-icon> New Compliance Record</span>
         </app-button>
       </div>
 
@@ -41,7 +43,9 @@ import { ComplianceDetailModalComponent } from './compliance-detail-modal.compon
           </ng-container>
         </ng-template>
         <ng-template #actionsTemplate let-row>
-          <button class="action-btn" title="View" (click)="openDetail(row)">📋</button>
+          <button class="action-btn" title="View" (click)="openDetail(row)">
+            <app-icon name="eye" [size]="16"></app-icon>
+          </button>
         </ng-template>
       </app-data-table>
 

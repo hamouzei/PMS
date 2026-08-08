@@ -8,13 +8,15 @@ import { StatusBadgeComponent } from '../../shared/components/status-badge/statu
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { DisposalFormModalComponent } from './disposal-form-modal.component';
 import { DisposalDetailModalComponent } from './disposal-detail-modal.component';
+import { IconComponent } from '../../shared/components/icon/icon.component';
 
 @Component({
   selector: 'app-disposal-list',
   standalone: true,
   imports: [
     CommonModule, FormsModule, DataTableComponent, StatusBadgeComponent,
-    ButtonComponent, DisposalFormModalComponent, DisposalDetailModalComponent
+    ButtonComponent, DisposalFormModalComponent, DisposalDetailModalComponent,
+    IconComponent
   ],
   template: `
     <div class="page-container">
@@ -24,7 +26,7 @@ import { DisposalDetailModalComponent } from './disposal-detail-modal.component'
           <p class="subtitle">Request and track property disposal — Auction, Tendering, Scrapping</p>
         </div>
         <app-button variant="gold" (btnClick)="showCreateModal = true">
-          <span>🗑️ New Disposal Request</span>
+          <span><app-icon name="plus" [size]="16"></app-icon> New Disposal Request</span>
         </app-button>
       </div>
 
@@ -49,7 +51,9 @@ import { DisposalDetailModalComponent } from './disposal-detail-modal.component'
           </ng-container>
         </ng-template>
         <ng-template #actionsTemplate let-row>
-          <button class="action-btn" title="View" (click)="openDetail(row)">📋</button>
+          <button class="action-btn" title="View" (click)="openDetail(row)">
+            <app-icon name="eye" [size]="16"></app-icon>
+          </button>
         </ng-template>
       </app-data-table>
 

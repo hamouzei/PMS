@@ -6,11 +6,12 @@ import { Category } from '../../../core/models/master-data.model';
 import { ColumnDef, DataTableComponent } from '../../../shared/components/data-table/data-table.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { CategoryModalComponent } from './category-modal.component';
+import { IconComponent } from '../../../shared/components/icon/icon.component';
 
 @Component({
   selector: 'app-category-list',
   standalone: true,
-  imports: [CommonModule, DataTableComponent, ButtonComponent, CategoryModalComponent],
+  imports: [CommonModule, DataTableComponent, ButtonComponent, CategoryModalComponent, IconComponent],
   template: `
     <div class="tab-content">
       <div class="content-header">
@@ -19,7 +20,7 @@ import { CategoryModalComponent } from './category-modal.component';
           <p class="subtitle">Organize property and item master catalog into logical hierarchy</p>
         </div>
         <app-button variant="gold" (btnClick)="openCreateModal()">
-          <span>➕ Add Category</span>
+          <span><app-icon name="plus" [size]="16"></app-icon> Add Category</span>
         </app-button>
       </div>
 
@@ -38,7 +39,9 @@ import { CategoryModalComponent } from './category-modal.component';
         </ng-template>
 
         <ng-template #actionsTemplate let-row>
-          <button type="button" class="btn-icon" (click)="openEditModal(row)">✏️ Edit</button>
+          <button type="button" class="btn-icon" (click)="openEditModal(row)">
+            <app-icon name="edit" [size]="14"></app-icon> Edit
+          </button>
         </ng-template>
       </app-data-table>
 

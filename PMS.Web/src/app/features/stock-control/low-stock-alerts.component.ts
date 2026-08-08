@@ -3,16 +3,17 @@ import { CommonModule } from '@angular/common';
 import { StockApiService, LowStockItem } from '../../core/services/stock-api.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { ColumnDef, DataTableComponent } from '../../shared/components/data-table/data-table.component';
+import { IconComponent } from '../../shared/components/icon/icon.component';
 
 @Component({
   selector: 'app-low-stock-alerts',
   standalone: true,
-  imports: [CommonModule, DataTableComponent],
+  imports: [CommonModule, DataTableComponent, IconComponent],
   template: `
     <div class="page-container">
       <div class="page-header">
         <div>
-          <h2>⚠️ Low Stock Alerts</h2>
+          <h2><app-icon name="alert-triangle" [size]="24" class="header-alert-icon"></app-icon> Low Stock Alerts</h2>
           <p class="subtitle">Items below their minimum stock level that need replenishment</p>
         </div>
       </div>
@@ -21,7 +22,7 @@ import { ColumnDef, DataTableComponent } from '../../shared/components/data-tabl
         <strong>{{ rows.length }}</strong> item(s) are below minimum stock level
       </div>
       <div class="no-alerts" *ngIf="!loading && rows.length === 0">
-        ✅ All items are above their minimum stock levels
+        <app-icon name="check-circle" [size]="20"></app-icon> All items are above their minimum stock levels
       </div>
 
       <app-data-table [columns]="columns" [data]="rows" [loading]="loading"

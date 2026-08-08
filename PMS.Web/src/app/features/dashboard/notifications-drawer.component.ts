@@ -5,16 +5,19 @@ import { ReportsApiService } from '../../core/services/reports-api.service';
 import { AuthStore } from '../../core/auth/auth.store';
 import { NotificationEventDto } from '../../core/models/reports.model';
 import { EthiopianDatePipe } from '../../shared/pipes/ethiopian-date.pipe';
+import { IconComponent } from '../../shared/components/icon/icon.component';
 
 @Component({
   selector: 'app-notifications-drawer',
   standalone: true,
-  imports: [CommonModule, EthiopianDatePipe],
+  imports: [CommonModule, EthiopianDatePipe, IconComponent],
   template: `
     <div class="drawer-backdrop" (click)="close()">
       <div class="drawer-panel" (click)="$event.stopPropagation()">
         <div class="drawer-header">
-          <h3>🔔 Notifications</h3>
+          <h3 class="drawer-title">
+            <app-icon name="bell" [size]="20"></app-icon> Notifications
+          </h3>
           <div class="drawer-header-actions">
             <button class="filter-btn" [class.active]="unreadOnly" (click)="toggleUnreadOnly()">
               Unread Only
@@ -27,7 +30,7 @@ import { EthiopianDatePipe } from '../../shared/pipes/ethiopian-date.pipe';
             <div class="spinner"></div> Loading notifications...
           </div>
           <div *ngIf="!loading && notifications.length === 0" class="empty-state">
-            <span class="empty-icon">✅</span>
+            <app-icon name="check-circle" [size]="36" class="empty-icon"></app-icon>
             <p>No {{ unreadOnly ? 'unread ' : '' }}notifications</p>
           </div>
           <div *ngFor="let n of notifications" class="notification-item" [class.unread]="!n.isRead" (click)="markRead(n)">
@@ -36,7 +39,9 @@ import { EthiopianDatePipe } from '../../shared/pipes/ethiopian-date.pipe';
               <span class="notif-date">{{ n.createdDate | ethiopianDate }}</span>
             </div>
             <p class="notif-message">{{ n.message }}</p>
-            <span *ngIf="n.referenceNumber" class="notif-ref">📎 {{ n.referenceNumber }}</span>
+            <span *ngIf="n.referenceNumber" class="notif-ref">
+              <app-icon name="paperclip" [size]="14"></app-icon> {{ n.referenceNumber }}
+            </span>
           </div>
           <button *ngIf="hasMore" class="load-more-btn" (click)="loadMore()">Load More</button>
         </div>

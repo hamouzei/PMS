@@ -7,16 +7,17 @@ import { ButtonComponent } from '../../shared/components/button/button.component
 import { StatusBadgeComponent } from '../../shared/components/status-badge/status-badge.component';
 import { EthiopianDatePipe } from '../../shared/pipes/ethiopian-date.pipe';
 import { PropertyHandover, WorkflowStatus } from '../../core/models/workflow.model';
+import { IconComponent } from '../../shared/components/icon/icon.component';
 
 @Component({
   selector: 'app-handover-detail-modal',
   standalone: true,
-  imports: [CommonModule, ButtonComponent, StatusBadgeComponent, EthiopianDatePipe],
+  imports: [CommonModule, ButtonComponent, StatusBadgeComponent, EthiopianDatePipe, IconComponent],
   template: `
     <div class="modal-backdrop" (click)="close()">
       <div class="modal-panel modal-lg" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h3>📋 Handover Detail — {{ detail?.handoverNumber }}</h3>
+          <h3><app-icon name="handshake" [size]="20"></app-icon> Handover Detail — {{ detail?.handoverNumber }}</h3>
           <button class="modal-close" (click)="close()">&times;</button>
         </div>
 
@@ -53,7 +54,7 @@ import { PropertyHandover, WorkflowStatus } from '../../core/models/workflow.mod
 
           <div class="modal-footer" *ngIf="canApprove">
             <app-button variant="gold" (btnClick)="approve()" [loading]="approving">
-              <span>✅ Approve Handover</span>
+              <span><app-icon name="check-circle" [size]="16"></app-icon> Approve Handover</span>
             </app-button>
           </div>
         </div>

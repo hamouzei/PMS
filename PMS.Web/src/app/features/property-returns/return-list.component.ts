@@ -9,13 +9,15 @@ import { ButtonComponent } from '../../shared/components/button/button.component
 import { EthiopianDatePipe } from '../../shared/pipes/ethiopian-date.pipe';
 import { ReturnFormModalComponent } from './return-form-modal.component';
 import { ReturnDetailModalComponent } from './return-detail-modal.component';
+import { IconComponent } from '../../shared/components/icon/icon.component';
 
 @Component({
   selector: 'app-return-list',
   standalone: true,
   imports: [
     CommonModule, FormsModule, DataTableComponent, StatusBadgeComponent,
-    ButtonComponent, EthiopianDatePipe, ReturnFormModalComponent, ReturnDetailModalComponent
+    ButtonComponent, EthiopianDatePipe, ReturnFormModalComponent, ReturnDetailModalComponent,
+    IconComponent
   ],
   template: `
     <div class="page-container">
@@ -25,7 +27,7 @@ import { ReturnDetailModalComponent } from './return-detail-modal.component';
           <p class="subtitle">Return items from custody back to the store — storekeeper approves and restocks</p>
         </div>
         <app-button variant="gold" (btnClick)="showCreateModal = true">
-          <span>↩️ New Return</span>
+          <span><app-icon name="plus" [size]="16"></app-icon> New Return</span>
         </app-button>
       </div>
 
@@ -60,7 +62,9 @@ import { ReturnDetailModalComponent } from './return-detail-modal.component';
         </ng-template>
 
         <ng-template #actionsTemplate let-row>
-          <button class="action-btn" title="View" (click)="openDetail(row)">📋</button>
+          <button class="action-btn" title="View" (click)="openDetail(row)">
+            <app-icon name="eye" [size]="16"></app-icon>
+          </button>
         </ng-template>
       </app-data-table>
 

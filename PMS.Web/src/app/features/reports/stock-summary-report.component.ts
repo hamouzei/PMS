@@ -20,7 +20,7 @@ import { ColumnDef, DataTableComponent } from '../../shared/components/data-tabl
       </div>
 
       <div class="filter-bar">
-        <input [(ngModel)]="searchTerm" (ngModelChange)="applyFilter()" class="filter-input" placeholder="🔍 Search by SKU or item name..." />
+        <input [(ngModel)]="searchTerm" (ngModelChange)="applyFilter()" class="filter-input" placeholder="Search by SKU or item name..." />
         <label class="filter-check">
           <input type="checkbox" [(ngModel)]="showLowOnly" (ngModelChange)="applyFilter()" />
           Low stock only

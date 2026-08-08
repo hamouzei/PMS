@@ -35,6 +35,10 @@
   --text-on-navy: #FFFFFF;
   --text-on-navy-muted: #94A3B8;
 
+  // Theme-aware Accents (Light Mode Default)
+  --icon-accent: var(--ecx-navy-primary);
+  --brand-header-text: var(--ecx-navy-primary);
+
   // Elevation & Shadows
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
@@ -60,6 +64,9 @@
   --text-primary: #F8FAFC;
   --text-secondary: #94A3B8;
   --text-muted: #64748B;
+
+  --icon-accent: var(--ecx-gold-primary);
+  --brand-header-text: #60A5FA;
 
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);

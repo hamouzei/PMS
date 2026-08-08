@@ -8,16 +8,17 @@ import { ButtonComponent } from '../../shared/components/button/button.component
 import { StatusBadgeComponent } from '../../shared/components/status-badge/status-badge.component';
 import { EthiopianDatePipe } from '../../shared/pipes/ethiopian-date.pipe';
 import { ReceivingNote, WorkflowStatus } from '../../core/models/workflow.model';
+import { IconComponent } from '../../shared/components/icon/icon.component';
 
 @Component({
   selector: 'app-receiving-detail-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, ButtonComponent, StatusBadgeComponent, EthiopianDatePipe],
+  imports: [CommonModule, FormsModule, ButtonComponent, StatusBadgeComponent, EthiopianDatePipe, IconComponent],
   template: `
     <div class="modal-backdrop" (click)="close()">
       <div class="modal-panel modal-lg" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h3>📋 Receiving Detail — {{ detail?.grnNumber }}</h3>
+          <h3><app-icon name="inbox" [size]="20"></app-icon> Receiving Detail — {{ detail?.grnNumber }}</h3>
           <button class="modal-close" (click)="close()">&times;</button>
         </div>
         <div class="modal-body" *ngIf="detail; else loadingTpl">
@@ -46,28 +47,29 @@ import { ReceivingNote, WorkflowStatus } from '../../core/models/workflow.model'
 
           <!-- Inspection Section -->
           <div *ngIf="canInspect" class="action-section">
-            <h4 class="section-title">🔍 Record Inspection</h4>
+            <h4 class="section-title"><app-icon name="search" [size]="18"></app-icon> Record Inspection</h4>
             <div class="form-row">
               <label><input type="checkbox" [(ngModel)]="inspectionPassed" /> Inspection Passed</label>
               <input *ngIf="!inspectionPassed" [(ngModel)]="deviationNotes" class="form-control" placeholder="Deviation notes..." />
             </div>
             <app-button variant="gold" (btnClick)="inspect()" [loading]="inspecting">
-              <span>🔍 Submit Inspection</span>
+              <span><app-icon name="check" [size]="16"></app-icon> Submit Inspection</span>
             </app-button>
           </div>
 
           <!-- Release Section -->
           <div *ngIf="canRelease" class="action-section">
-            <h4 class="section-title">📦 Release to Stock</h4>
+            <h4 class="section-title"><app-icon name="package" [size]="18"></app-icon> Release to Stock</h4>
             <app-button variant="gold" (btnClick)="release()" [loading]="releasing">
-              <span>✅ Release to Stock</span>
+              <span><app-icon name="check-circle" [size]="16"></app-icon> Release to Stock</span>
             </app-button>
           </div>
 
           <!-- Inspection log -->
           <div *ngIf="detail.inspectionLog" class="info-box">
             <strong>Inspection:</strong>
-            {{ detail.inspectionLog.isPassed ? '✅ Passed' : '❌ Failed' }}
+            <span *ngIf="detail.inspectionLog.isPassed"><app-icon name="check-circle" [size]="16"></app-icon> Passed</span>
+            <span *ngIf="!detail.inspectionLog.isPassed"><app-icon name="x-circle" [size]="16"></app-icon> Failed</span>
             <span *ngIf="detail.inspectionLog.deviationNotes"> — {{ detail.inspectionLog.deviationNotes }}</span>
           </div>
         </div>

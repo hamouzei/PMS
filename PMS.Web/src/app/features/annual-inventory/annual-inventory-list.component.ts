@@ -9,13 +9,15 @@ import { ButtonComponent } from '../../shared/components/button/button.component
 import { EthiopianDatePipe } from '../../shared/pipes/ethiopian-date.pipe';
 import { InventoryFormModalComponent } from './inventory-form-modal.component';
 import { InventoryDetailModalComponent } from './inventory-detail-modal.component';
+import { IconComponent } from '../../shared/components/icon/icon.component';
 
 @Component({
   selector: 'app-annual-inventory-list',
   standalone: true,
   imports: [
     CommonModule, FormsModule, DataTableComponent, StatusBadgeComponent,
-    ButtonComponent, EthiopianDatePipe, InventoryFormModalComponent, InventoryDetailModalComponent
+    ButtonComponent, EthiopianDatePipe, InventoryFormModalComponent, InventoryDetailModalComponent,
+    IconComponent
   ],
   template: `
     <div class="page-container">
@@ -25,7 +27,7 @@ import { InventoryDetailModalComponent } from './inventory-detail-modal.componen
           <p class="subtitle">Conduct and track annual stock counts with discrepancy analysis</p>
         </div>
         <app-button variant="gold" (btnClick)="showCreateModal = true">
-          <span>📊 New Inventory Count</span>
+          <span><app-icon name="plus" [size]="16"></app-icon> New Inventory Count</span>
         </app-button>
       </div>
 
@@ -46,7 +48,9 @@ import { InventoryDetailModalComponent } from './inventory-detail-modal.componen
           </ng-container>
         </ng-template>
         <ng-template #actionsTemplate let-row>
-          <button class="action-btn" title="View" (click)="openDetail(row)">📋</button>
+          <button class="action-btn" title="View" (click)="openDetail(row)">
+            <app-icon name="eye" [size]="16"></app-icon>
+          </button>
         </ng-template>
       </app-data-table>
 

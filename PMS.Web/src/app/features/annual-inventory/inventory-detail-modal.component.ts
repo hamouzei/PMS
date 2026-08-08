@@ -7,16 +7,17 @@ import { ButtonComponent } from '../../shared/components/button/button.component
 import { StatusBadgeComponent } from '../../shared/components/status-badge/status-badge.component';
 import { EthiopianDatePipe } from '../../shared/pipes/ethiopian-date.pipe';
 import { AnnualInventory, WorkflowStatus } from '../../core/models/workflow.model';
+import { IconComponent } from '../../shared/components/icon/icon.component';
 
 @Component({
   selector: 'app-inventory-detail-modal',
   standalone: true,
-  imports: [CommonModule, ButtonComponent, StatusBadgeComponent, EthiopianDatePipe],
+  imports: [CommonModule, ButtonComponent, StatusBadgeComponent, EthiopianDatePipe, IconComponent],
   template: `
     <div class="modal-backdrop" (click)="close()">
       <div class="modal-panel modal-lg" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h3>📋 Inventory — {{ detail?.inventoryNumber }}</h3>
+          <h3><app-icon name="bar-chart-3" [size]="20"></app-icon> Inventory — {{ detail?.inventoryNumber }}</h3>
           <button class="modal-close" (click)="close()">&times;</button>
         </div>
         <div class="modal-body" *ngIf="detail; else loadingTpl">
@@ -32,7 +33,7 @@ import { AnnualInventory, WorkflowStatus } from '../../core/models/workflow.mode
           <h4 class="section-title">Count Sheet ({{ detail.lines.length }} lines)</h4>
 
           <div *ngIf="discrepancyCount > 0" class="discrepancy-banner">
-            ⚠️ <strong>{{ discrepancyCount }}</strong> item(s) have discrepancies.
+            <app-icon name="alert-triangle" [size]="16"></app-icon> <strong>{{ discrepancyCount }}</strong> item(s) have discrepancies.
             Total: <strong>{{ totalDiscrepancy > 0 ? '+' : '' }}{{ totalDiscrepancy }}</strong>
           </div>
 
@@ -58,7 +59,7 @@ import { AnnualInventory, WorkflowStatus } from '../../core/models/workflow.mode
             <h4 class="section-title">Finalize Inventory</h4>
             <p class="action-hint">Completing the inventory will lock the count sheet and trigger discrepancy alerts.</p>
             <app-button variant="gold" (btnClick)="complete()" [loading]="completing">
-              <span>✅ Complete Inventory</span>
+              <span><app-icon name="check-circle" [size]="16"></app-icon> Complete Inventory</span>
             </app-button>
           </div>
         </div>
