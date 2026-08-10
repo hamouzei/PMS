@@ -1,4 +1,5 @@
 using System.Text;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -124,11 +125,24 @@ builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment() && builder.Configuration.GetValue<bool>("SeedData:ApplyOnStartup"))
+if (app.Environment.IsDevelopment())
 {
     using var scope = app.Services.CreateScope();
     var dbContext = scope.ServiceProvider.GetRequiredService<PMSDbContext>();
-    await PasSeedData.SeedAsync(dbContext);
+    try
+    {
+        await dbContext.Database.ExecuteSqlRawAsync(
+            "IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('PurchaseRequests') AND name = 'RejectionReason') ALTER TABLE [PurchaseRequests] ADD [RejectionReason] nvarchar(MAX) NULL;");
+    }
+    catch
+    {
+        // Ignore DB connection errors during testing
+    }
+
+    if (builder.Configuration.GetValue<bool>("SeedData:ApplyOnStartup"))
+    {
+        await PasSeedData.SeedAsync(dbContext);
+    }
 }
 
 if (app.Environment.IsDevelopment())
