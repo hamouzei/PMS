@@ -6,6 +6,7 @@ import { environment } from '../../../environments/environment';
 import { AppUserDto, LoginRequest, LoginResponse, RefreshTokenRequest, UserRole } from '../models/user.model';
 import { AuthStore } from './auth.store';
 import { TokenStorageService } from './token-storage.service';
+import { decodeJwtPayload } from '../utils/jwt.utils';
 
 @Injectable({
   providedIn: 'root'
@@ -23,8 +24,15 @@ export class AuthService {
         this.tokenStorage.setRefreshToken(response.refreshToken);
 
         const roleEnum = UserRole[response.role as keyof typeof UserRole] || UserRole.Employee;
-        const mockUser: AppUserDto = {
-          id: response.employeeId,
+
+        // Extract the GUID user ID from the JWT `sub` claim.
+        // The login response only provides employeeId (e.g. "PAS-ADMIN"),
+        // but backend entities reference users by their GUID.
+        const payload = decodeJwtPayload(response.token);
+        const userId = payload?.sub || response.employeeId;
+
+        const user: AppUserDto = {
+          id: userId,
           employeeId: response.employeeId,
           userName: response.userName,
           fullName: response.userName,
@@ -32,7 +40,7 @@ export class AuthService {
           isActive: true
         };
 
-        this.authStore.setAuth(mockUser, response.token, response.role);
+        this.authStore.setAuth(user, response.token, response.role);
       })
     );
   }
