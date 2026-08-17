@@ -11,7 +11,7 @@ namespace PMS.API.Controllers;
 
 /// <summary>
 /// SR002: Admin Module — user management, system configuration, budget allocation.
-/// </summary>
+/// </summary> 
 [ApiController]
 [Route("api/admin")]
 [Authorize(Roles = PasRoles.PropertyAdmin)]
