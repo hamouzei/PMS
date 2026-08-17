@@ -190,7 +190,6 @@ src/app/
 ```
 PMS/
 ├── PMS.sln                              # Visual Studio solution
-├── ECX_Property_Automation_SRS.md       # Full Software Requirements Specification
 │
 ├── PMS.Domain/                          # Domain layer (zero dependencies)
 │   ├── Common/BaseDomainEntity.cs       # Base entity: Id, CreatedDate, UpdatedDate, CreatedBy, UpdatedBy
