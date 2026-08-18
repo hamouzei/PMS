@@ -19,6 +19,7 @@ public class ReportsController(PMSDbContext context) : ControllerBase
 {
     /// <summary>SR001: Dashboard KPIs with all pending workflow counts.</summary>
     [HttpGet("dashboard")]
+    [Authorize] // Dashboard is the landing page — all authenticated roles may access it.
     public async Task<IActionResult> Dashboard(CancellationToken cancellationToken)
     {
         return Ok(new

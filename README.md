@@ -1,5 +1,5 @@
 <p align="center">
-  <strong>ECX PAS</strong><br/>
+  <strong>AFRICOM Technologies PAS</strong><br/>
   <em>Property Automation System</em>
 </p>
 
@@ -12,9 +12,9 @@
 
 ---
 
-# ECX Property Automation System (PAS)
+# AFRICOM Technologies — Property Automation System (PAS)
 
-A full-stack enterprise **Property & Inventory Management System** built for the **Ethiopia Commodity Exchange (ECX)**. PAS digitizes the complete lifecycle of organizational property — from procurement and receiving through custody tracking, inter-departmental transfers, returns, disposal, and regulatory compliance — replacing manual paper-based workflows with automated, auditable digital processes.
+A full-stack enterprise **Property & Inventory Management System** developed by an **Intern of AFRICOM Technologies**. PAS digitizes the complete lifecycle of organizational property — from procurement and receiving through custody tracking, inter-departmental transfers, returns, disposal, and regulatory compliance — replacing manual paper-based workflows with automated, auditable digital processes.
 
 ---
 
@@ -41,7 +41,7 @@ A full-stack enterprise **Property & Inventory Management System** built for the
 
 ## Overview
 
-The ECX Property Automation System (PAS) was designed per the **ECX Property Administration Procedure Manual** and a detailed Software Requirements Specification (SRS). It provides a centralized platform for property administrators, storekeepers, department managers, inspectors, compliance officers, and procurement staff to collaboratively manage the exchange's fixed assets and consumable supplies.
+The AFRICOM Technologies Property Automation System (PAS) was designed per a comprehensive **Property Administration Procedure Manual** and a detailed Software Requirements Specification (SRS). It provides a centralized platform for property administrators, storekeepers, department managers, inspectors, compliance officers, and procurement staff to collaboratively manage an organization's fixed assets and consumable supplies.
 
 ### Business Goals
 
@@ -453,7 +453,7 @@ When `SeedData:ApplyOnStartup` is `true`, the system seeds the following demo da
 
 - **Categories:** Fixed Assets, Consumables
 - **Items:** Laptop Computer (FA-LAP-001), A4 Paper Ream (CON-PAP-001)
-- **Warehouse:** Head Office Central Store (ECX-HO)
+- **Warehouse:** Head Office Central Store (AFRICOM-HO)
 - **Shelf Locations:** Two shelves with QR codes
 - **Supplier:** Demo Supplier PLC
 - **Opening Stock:** 5 laptops, 100 paper reams
@@ -497,7 +497,7 @@ PAS uses auto-incrementing document sequences per fiscal year:
 | `RMRN` | Return Material Return Note | `RMRN-2026-00001` |
 | `RMTN` | Return Material Transfer Note | `RMTN-2026-00001` |
 
-Tag numbers follow the ECX convention: `ECX-{LocationCode}-{TypeCode}-{SequenceNumber}` (e.g., `ECX-HO-1-01-00001`).
+Tag numbers follow the AFRICOM convention: `AFRICOM-{LocationCode}-{TypeCode}-{SequenceNumber}` (e.g., `AFRICOM-HO-1-01-00001`).
 
 ---
 
